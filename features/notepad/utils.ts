@@ -6,6 +6,7 @@ export const createEmptyStore = (): AppStore => ({
   notes: [],
   todos: [],
   shopping: [],
+  links: [],
   preferences: DEFAULT_THEME_PREFERENCES,
 });
 

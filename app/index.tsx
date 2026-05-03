@@ -9,19 +9,22 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useRef, useState } from 'react';
 
-import { BottomComposer } from '@/features/notepad/components/bottom-composer';
+import { AddItemModal } from '@/features/notepad/components/add-item-modal';
 import { EntityList } from '@/features/notepad/components/entity-list';
+import { AppFooter, FooterKey } from '@/features/navigation/app-footer';
 import { SectionKey, sectionMeta } from '@/features/notepad/types';
 import { useNotepadEntities } from '@/features/notepad/use-notepad-entities';
 import { useNotepadStore } from '@/features/notepad/use-notepad-store';
 import { Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { minimalThemes, resolveThemeMode } from '@/lib/themes';
+import { indexStyles as styles } from './index.styles';
 
 export default function NotepadApp() {
   const systemColorScheme = useColorScheme();
@@ -29,6 +32,7 @@ export default function NotepadApp() {
 
   const [activeSection, setActiveSection] = useState<SectionKey>('notes');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [itemModalOpen, setItemModalOpen] = useState(false);
   const menuProgress = useRef(new Animated.Value(0)).current;
 
   const { store, setStore, isHydrated, storageError } = useNotepadStore();
@@ -75,6 +79,51 @@ export default function NotepadApp() {
     setMenuOpen(false);
   };
 
+  const onFooterPress = (key: FooterKey) => {
+    if (key === 'links') {
+      router.push('/links');
+      return;
+    }
+    setActiveSection(key);
+  };
+
+  const openComposer = () => {
+    setItemModalOpen(true);
+  };
+
+  const closeComposer = () => {
+    if (activeSection === 'notes') {
+      entities.cancelNoteEdit();
+    } else if (activeSection === 'todos') {
+      entities.cancelTodoEdit();
+    } else {
+      entities.cancelShoppingEdit();
+    }
+    setItemModalOpen(false);
+  };
+
+  const submitFromModal = () => {
+    if (activeSection === 'notes') {
+      const saved = entities.handleNoteSubmit();
+      if (saved) {
+        setItemModalOpen(false);
+      }
+      return;
+    }
+    if (activeSection === 'todos') {
+      const saved = entities.handleTodoSubmit();
+      if (saved) {
+        setItemModalOpen(false);
+      }
+      return;
+    }
+
+    const saved = entities.handleShoppingSubmit();
+    if (saved) {
+      setItemModalOpen(false);
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]} edges={['top', 'bottom']}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
@@ -106,6 +155,37 @@ export default function NotepadApp() {
           </View>
         ) : null}
 
+        <View style={[styles.searchWrap, { borderColor: palette.border, backgroundColor: palette.panel }]}>
+          <MaterialIcons color={palette.muted} name="search" size={18} />
+          {activeSection === 'notes' ? (
+            <TextInput
+              onChangeText={entities.setNoteSearch}
+              placeholder="Search notes..."
+              placeholderTextColor={palette.muted}
+              style={[styles.searchInput, { color: palette.text }]}
+              value={entities.noteSearch}
+            />
+          ) : null}
+          {activeSection === 'todos' ? (
+            <TextInput
+              onChangeText={entities.setTodoSearch}
+              placeholder="Search tasks..."
+              placeholderTextColor={palette.muted}
+              style={[styles.searchInput, { color: palette.text }]}
+              value={entities.todoSearch}
+            />
+          ) : null}
+          {activeSection === 'shopping' ? (
+            <TextInput
+              onChangeText={entities.setShoppingSearch}
+              placeholder="Search shopping..."
+              placeholderTextColor={palette.muted}
+              style={[styles.searchInput, { color: palette.text }]}
+              value={entities.shoppingSearch}
+            />
+          ) : null}
+        </View>
+
         <EntityList
           activeSection={activeSection}
           isHydrated={isHydrated}
@@ -116,41 +196,49 @@ export default function NotepadApp() {
           deferredNoteSearch={entities.deferredNoteSearch}
           deferredTodoSearch={entities.deferredTodoSearch}
           deferredShoppingSearch={entities.deferredShoppingSearch}
-          onEditNote={entities.editNote}
+          onEditNote={(item) => {
+            entities.editNote(item);
+            setItemModalOpen(true);
+          }}
           onDeleteNote={entities.deleteNote}
-          onEditTodo={entities.editTodo}
+          onEditTodo={(item) => {
+            entities.editTodo(item);
+            setItemModalOpen(true);
+          }}
           onDeleteTodo={entities.deleteTodo}
           onToggleTodo={entities.toggleTodo}
-          onEditShopping={entities.editShopping}
+          onEditShopping={(item) => {
+            entities.editShopping(item);
+            setItemModalOpen(true);
+          }}
           onDeleteShopping={entities.deleteShopping}
         />
 
-        <BottomComposer
+        <Pressable onPress={openComposer} style={[styles.fabButton, { backgroundColor: palette.accent }]}>
+          <MaterialIcons color="#fff" name="add" size={26} />
+        </Pressable>
+
+        <AppFooter activeKey={activeSection} palette={palette} onPress={onFooterPress} />
+
+        <AddItemModal
+          visible={itemModalOpen}
           activeSection={activeSection}
           palette={palette}
           noteTitle={entities.noteTitle}
           noteBody={entities.noteBody}
-          noteSearch={entities.noteSearch}
           editingNoteId={entities.editingNoteId}
           todoTitle={entities.todoTitle}
-          todoSearch={entities.todoSearch}
           editingTodoId={entities.editingTodoId}
           shoppingLabel={entities.shoppingLabel}
-          shoppingSearch={entities.shoppingSearch}
           editingShoppingId={entities.editingShoppingId}
           setNoteTitle={entities.setNoteTitle}
           setNoteBody={entities.setNoteBody}
-          setNoteSearch={entities.setNoteSearch}
           setTodoTitle={entities.setTodoTitle}
-          setTodoSearch={entities.setTodoSearch}
           setShoppingLabel={entities.setShoppingLabel}
-          setShoppingSearch={entities.setShoppingSearch}
-          onSubmitNote={entities.handleNoteSubmit}
-          onCancelNoteEdit={entities.cancelNoteEdit}
-          onSubmitTodo={entities.handleTodoSubmit}
-          onCancelTodoEdit={entities.cancelTodoEdit}
-          onSubmitShopping={entities.handleShoppingSubmit}
-          onCancelShoppingEdit={entities.cancelShoppingEdit}
+          onClose={closeComposer}
+          onSubmitNote={submitFromModal}
+          onSubmitTodo={submitFromModal}
+          onSubmitShopping={submitFromModal}
         />
 
         <View pointerEvents={menuOpen ? 'auto' : 'none'} style={StyleSheet.absoluteFill}>
@@ -192,6 +280,30 @@ export default function NotepadApp() {
             })}
 
             <View style={[styles.drawerBlock, { borderTopColor: palette.border }]}>
+              <Text style={[styles.drawerBlockTitle, { color: palette.text }]}>Pages</Text>
+              <Pressable
+                onPress={() => {
+                  setMenuOpen(false);
+                  router.push('/links');
+                }}
+                style={[
+                  styles.drawerItem,
+                  {
+                    borderColor: palette.border,
+                    backgroundColor: palette.panelSoft,
+                  },
+                ]}>
+                <MaterialIcons color={palette.muted} name="link" size={20} />
+                <View style={styles.drawerThemeActionTextWrap}>
+                  <Text style={[styles.drawerItemText, { color: palette.text }]}>Links</Text>
+                  <Text style={[styles.drawerThemeActionSubtext, { color: palette.muted }]}>
+                    Save URLs with notes
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+
+            <View style={[styles.drawerBlock, { borderTopColor: palette.border }]}>
               <Text style={[styles.drawerBlockTitle, { color: palette.text }]}>Theme</Text>
               <Pressable
                 onPress={() => {
@@ -220,103 +332,3 @@ export default function NotepadApp() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  flex: {
-    flex: 1,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-  iconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitleWrap: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 24,
-    lineHeight: 30,
-  },
-  headerSubtitle: {
-    marginTop: 2,
-    fontSize: 13,
-  },
-  warningBox: {
-    marginHorizontal: 16,
-    marginTop: 10,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-  },
-  warningText: {
-    fontSize: 13,
-    fontFamily: Fonts.sans,
-  },
-  menuOverlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  drawer: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    width: 280,
-    borderRightWidth: 1,
-    paddingTop: 52,
-    paddingHorizontal: 14,
-    gap: 10,
-  },
-  drawerTitle: {
-    fontSize: 20,
-    lineHeight: 26,
-    marginBottom: 6,
-  },
-  drawerItem: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  drawerItemText: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontFamily: Fonts.sans,
-  },
-  drawerBlock: {
-    borderTopWidth: 1,
-    marginTop: 6,
-    paddingTop: 10,
-    gap: 8,
-  },
-  drawerBlockTitle: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontFamily: Fonts.mono,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  drawerThemeActionTextWrap: {
-    flex: 1,
-  },
-  drawerThemeActionSubtext: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-});

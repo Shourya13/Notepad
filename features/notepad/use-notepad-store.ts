@@ -24,6 +24,7 @@ const tryParseStore = (rawValue: string | null): AppStore => {
       notes: Array.isArray(parsed.notes) ? parsed.notes : [],
       todos: Array.isArray(parsed.todos) ? parsed.todos : [],
       shopping: Array.isArray(parsed.shopping) ? parsed.shopping : [],
+      links: Array.isArray(parsed.links) ? parsed.links : [],
       preferences: normalizeThemePreferences(parsed.preferences),
     };
   } catch {

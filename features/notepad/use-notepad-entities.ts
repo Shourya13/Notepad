@@ -71,7 +71,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
     const title = noteTitle.trim();
     const body = noteBody.trim();
     if (!title && !body) {
-      return;
+      return false;
     }
 
     if (editingNoteId) {
@@ -109,6 +109,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
 
     setNoteTitle('');
     setNoteBody('');
+    return true;
   };
 
   const editNote = (item: NoteItem) => {
@@ -136,7 +137,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
   const handleTodoSubmit = () => {
     const title = todoTitle.trim();
     if (!title) {
-      return;
+      return false;
     }
 
     if (editingTodoId) {
@@ -172,6 +173,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
     }
 
     setTodoTitle('');
+    return true;
   };
 
   const editTodo = (item: TodoItem) => {
@@ -215,7 +217,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
   const handleShoppingSubmit = () => {
     const label = shoppingLabel.trim();
     if (!label) {
-      return;
+      return false;
     }
 
     if (editingShoppingId) {
@@ -250,6 +252,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
     }
 
     setShoppingLabel('');
+    return true;
   };
 
   const editShopping = (item: ShoppingItem) => {

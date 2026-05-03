@@ -27,6 +27,14 @@ export type ShoppingItem = {
   updatedAt: string;
 };
 
+export type LinkItem = {
+  id: string;
+  url: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type ThemePreferences = {
   themeId: keyof typeof minimalThemes;
   mode: ThemeMode;
@@ -36,6 +44,7 @@ export type AppStore = {
   notes: NoteItem[];
   todos: TodoItem[];
   shopping: ShoppingItem[];
+  links: LinkItem[];
   preferences: ThemePreferences;
 };
 

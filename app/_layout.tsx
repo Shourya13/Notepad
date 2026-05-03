@@ -7,6 +7,7 @@ export default function RootLayout() {
     <>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="links" options={{ headerShown: false }} />
         <Stack.Screen name="themes" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />

@@ -21,6 +21,7 @@ export type ThemeId =
   | 'everforest'
   | 'catppuccin'
   | 'gruvbox'
+  | 'olive-market'
   | 'ash-mauve'
   | 'charcoal-sand'
   | 'forest-clay'
@@ -38,6 +39,7 @@ export const THEME_IDS: ThemeId[] = [
   'everforest',
   'catppuccin',
   'gruvbox',
+  'olive-market',
   'ash-mauve',
   'charcoal-sand',
   'forest-clay',
@@ -199,6 +201,41 @@ export const minimalThemes: Record<
       success: '#b8bb26',
       successSoft: '#3b4420',
       overlay: 'rgba(16, 14, 12, 0.56)',
+    },
+  },
+  'olive-market': {
+    title: 'Olive Market',
+    subtitle: 'Olive cards with warm orange action',
+    sourceLabel: 'Reference UI',
+    light: {
+      background: '#f3f5f2',
+      panel: '#3f6448',
+      panelSoft: '#4a7454',
+      border: '#355a40',
+      text: '#f6f8f5',
+      muted: '#d4dfd7',
+      accent: '#f4955b',
+      accentSoft: '#ffe3d1',
+      danger: '#d86a5c',
+      dangerSoft: '#f8ddd8',
+      success: '#a8d68f',
+      successSoft: '#3f744f',
+      overlay: 'rgba(17, 28, 21, 0.45)',
+    },
+    dark: {
+      background: '#1f2a23',
+      panel: '#2f4c37',
+      panelSoft: '#3c5e45',
+      border: '#4a7454',
+      text: '#f2f6f0',
+      muted: '#c7d4ca',
+      accent: '#f4955b',
+      accentSoft: '#5f3c2c',
+      danger: '#ea8a7f',
+      dangerSoft: '#5d3533',
+      success: '#9fd38a',
+      successSoft: '#35593f',
+      overlay: 'rgba(8, 11, 9, 0.58)',
     },
   },
   'ash-mauve': {

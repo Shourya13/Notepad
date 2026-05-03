@@ -29,6 +29,7 @@ type PersistedStore = {
   notes: unknown[];
   todos: unknown[];
   shopping: unknown[];
+  links: unknown[];
   preferences: ThemePreferences;
 };
 
@@ -41,6 +42,7 @@ const createEmptyStore = (): PersistedStore => ({
   notes: [],
   todos: [],
   shopping: [],
+  links: [],
   preferences: DEFAULT_THEME_PREFERENCES,
 });
 
@@ -55,6 +57,7 @@ const tryParseStore = (rawValue: string | null): PersistedStore => {
       notes: Array.isArray(parsed.notes) ? parsed.notes : [],
       todos: Array.isArray(parsed.todos) ? parsed.todos : [],
       shopping: Array.isArray(parsed.shopping) ? parsed.shopping : [],
+      links: Array.isArray(parsed.links) ? parsed.links : [],
       preferences: normalizeThemePreferences(parsed.preferences),
     };
   } catch {
