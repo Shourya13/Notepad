@@ -1,8 +1,8 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-import { ThemeMode, minimalThemes } from '@/lib/themes';
+import { ThemeMode, minimalThemes } from "@/lib/themes";
 
-export type SectionKey = 'notes' | 'todos' | 'shopping';
+export type SectionKey = "notes" | "todos" | "shopping" | "links";
 
 export type NoteItem = {
   id: string;
@@ -53,15 +53,19 @@ export const sectionMeta: Record<
   { title: string; icon: keyof typeof MaterialIcons.glyphMap }
 > = {
   notes: {
-    title: 'Notepad',
-    icon: 'sticky-note-2',
+    title: "Notepad",
+    icon: "sticky-note-2",
   },
   todos: {
-    title: 'Todo List',
-    icon: 'checklist',
+    title: "Todo List",
+    icon: "checklist",
   },
   shopping: {
-    title: 'Shopping List',
-    icon: 'shopping-cart',
+    title: "Shopping List",
+    icon: "shopping-cart",
+  },
+  links: {
+    title: "Links",
+    icon: "link",
   },
 };
