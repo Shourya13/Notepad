@@ -17,14 +17,20 @@ type Props = {
   editingTodoId: string | null;
   shoppingLabel: string;
   editingShoppingId: string | null;
+  linkUrlInput: string;
+  linkDescriptionInput: string;
+  linkEditingId: string | null;
   setNoteTitle: (value: string) => void;
   setNoteBody: (value: string) => void;
   setTodoTitle: (value: string) => void;
   setShoppingLabel: (value: string) => void;
+  setLinkUrlInput: (value: string) => void;
+  setLinkDescriptionInput: (value: string) => void;
   onClose: () => void;
   onSubmitNote: () => void;
   onSubmitTodo: () => void;
   onSubmitShopping: () => void;
+  onSubmitLink: () => void;
 };
 
 export function AddItemModal({
@@ -38,21 +44,31 @@ export function AddItemModal({
   editingTodoId,
   shoppingLabel,
   editingShoppingId,
+  linkUrlInput,
+  linkDescriptionInput,
+  linkEditingId,
   setNoteTitle,
   setNoteBody,
   setTodoTitle,
   setShoppingLabel,
+  setLinkUrlInput,
+  setLinkDescriptionInput,
   onClose,
   onSubmitNote,
   onSubmitTodo,
   onSubmitShopping,
+  onSubmitLink,
 }: Props) {
   const modalTitle =
     activeSection === 'notes' ? (editingNoteId ? 'Edit Note' : 'Add Note') : activeSection === 'todos'
       ? (editingTodoId ? 'Edit Task' : 'Add Task')
-      : editingShoppingId
-        ? 'Edit Item'
-        : 'Add Item';
+      : activeSection === 'shopping'
+        ? editingShoppingId
+          ? 'Edit Item'
+          : 'Add Item'
+        : linkEditingId
+          ? 'Edit Link'
+          : 'Add Link';
 
   return (
     <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
@@ -91,7 +107,6 @@ export function AddItemModal({
               <Pressable
                 onPress={() => {
                   onSubmitNote();
-                  onClose();
                 }}
                 style={[styles.submitButton, { backgroundColor: palette.accent }]}>
                 <Text style={styles.submitText}>{editingNoteId ? 'Save' : 'Add'}</Text>
@@ -111,7 +126,6 @@ export function AddItemModal({
               <Pressable
                 onPress={() => {
                   onSubmitTodo();
-                  onClose();
                 }}
                 style={[styles.submitButton, { backgroundColor: palette.accent }]}>
                 <Text style={styles.submitText}>{editingTodoId ? 'Save' : 'Add'}</Text>
@@ -131,10 +145,44 @@ export function AddItemModal({
               <Pressable
                 onPress={() => {
                   onSubmitShopping();
-                  onClose();
                 }}
                 style={[styles.submitButton, { backgroundColor: palette.accent }]}>
                 <Text style={styles.submitText}>{editingShoppingId ? 'Save' : 'Add'}</Text>
+              </Pressable>
+            </>
+          ) : null}
+
+          {activeSection === 'links' ? (
+            <>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+                onChangeText={setLinkUrlInput}
+                placeholder="https://example.com"
+                placeholderTextColor={palette.muted}
+                style={[styles.input, { color: palette.text, borderColor: palette.border, backgroundColor: palette.panel }]}
+                value={linkUrlInput}
+              />
+              <TextInput
+                multiline
+                onChangeText={setLinkDescriptionInput}
+                placeholder="Short description..."
+                placeholderTextColor={palette.muted}
+                style={[
+                  styles.input,
+                  styles.textArea,
+                  { color: palette.text, borderColor: palette.border, backgroundColor: palette.panel },
+                ]}
+                textAlignVertical="top"
+                value={linkDescriptionInput}
+              />
+              <Pressable
+                onPress={() => {
+                  onSubmitLink();
+                }}
+                style={[styles.submitButton, { backgroundColor: palette.accent }]}>
+                <Text style={styles.submitText}>{linkEditingId ? 'Save' : 'Add'}</Text>
               </Pressable>
             </>
           ) : null}

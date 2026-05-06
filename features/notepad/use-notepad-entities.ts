@@ -1,25 +1,44 @@
-import { Dispatch, SetStateAction, useDeferredValue, useMemo, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useDeferredValue,
+  useMemo,
+  useState,
+} from "react";
 
-import { AppStore, NoteItem, ShoppingItem, TodoItem } from './types';
-import { createId, nowIso, reorderWithUpdate } from './utils';
+import { AppStore, LinkItem, NoteItem, ShoppingItem, TodoItem } from "./types";
+import { createId, nowIso, reorderWithUpdate, toOpenableUrl } from "./utils";
 
-export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateAction<AppStore>>) {
-  const [noteTitle, setNoteTitle] = useState('');
-  const [noteBody, setNoteBody] = useState('');
+export function useNotepadEntities(
+  store: AppStore,
+  setStore: Dispatch<SetStateAction<AppStore>>,
+) {
+  const [noteTitle, setNoteTitle] = useState("");
+  const [noteBody, setNoteBody] = useState("");
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
-  const [noteSearch, setNoteSearch] = useState('');
+  const [noteSearch, setNoteSearch] = useState("");
 
-  const [todoTitle, setTodoTitle] = useState('');
+  const [todoTitle, setTodoTitle] = useState("");
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
-  const [todoSearch, setTodoSearch] = useState('');
+  const [todoSearch, setTodoSearch] = useState("");
 
-  const [shoppingLabel, setShoppingLabel] = useState('');
-  const [editingShoppingId, setEditingShoppingId] = useState<string | null>(null);
-  const [shoppingSearch, setShoppingSearch] = useState('');
+  const [shoppingLabel, setShoppingLabel] = useState("");
+  const [editingShoppingId, setEditingShoppingId] = useState<string | null>(
+    null,
+  );
+  const [shoppingSearch, setShoppingSearch] = useState("");
+
+  const [linkUrlInput, setLinkUrlInput] = useState("");
+  const [linkDescriptionInput, setLinkDescriptionInput] = useState("");
+  const [linkSearch, setLinkSearch] = useState("");
+  const [linkEditingId, setLinkEditingId] = useState<string | null>(null);
 
   const deferredNoteSearch = useDeferredValue(noteSearch.trim().toLowerCase());
   const deferredTodoSearch = useDeferredValue(todoSearch.trim().toLowerCase());
-  const deferredShoppingSearch = useDeferredValue(shoppingSearch.trim().toLowerCase());
+  const deferredShoppingSearch = useDeferredValue(
+    shoppingSearch.trim().toLowerCase(),
+  );
+  const deferredLinkSearch = useDeferredValue(linkSearch.trim().toLowerCase());
 
   const notes = useMemo(
     () =>
@@ -30,10 +49,13 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
           }
           const title = item.title.toLowerCase();
           const body = item.body.toLowerCase();
-          return title.includes(deferredNoteSearch) || body.includes(deferredNoteSearch);
+          return (
+            title.includes(deferredNoteSearch) ||
+            body.includes(deferredNoteSearch)
+          );
         })
         .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
-    [deferredNoteSearch, store.notes]
+    [deferredNoteSearch, store.notes],
   );
 
   const todos = useMemo(
@@ -51,7 +73,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
           }
           return right.updatedAt.localeCompare(left.updatedAt);
         }),
-    [deferredTodoSearch, store.todos]
+    [deferredTodoSearch, store.todos],
   );
 
   const shoppingItems = useMemo(
@@ -64,7 +86,23 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
           return item.label.toLowerCase().includes(deferredShoppingSearch);
         })
         .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
-    [deferredShoppingSearch, store.shopping]
+    [deferredShoppingSearch, store.shopping],
+  );
+
+  const links = useMemo(
+    () =>
+      store.links
+        .filter((item) => {
+          if (!deferredLinkSearch) {
+            return true;
+          }
+          return (
+            item.url.toLowerCase().includes(deferredLinkSearch) ||
+            item.description.toLowerCase().includes(deferredLinkSearch)
+          );
+        })
+        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
+    [deferredLinkSearch, store.links],
   );
 
   const handleNoteSubmit = () => {
@@ -76,13 +114,15 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
 
     if (editingNoteId) {
       setStore((currentStore) => {
-        const existing = currentStore.notes.find((item) => item.id === editingNoteId);
+        const existing = currentStore.notes.find(
+          (item) => item.id === editingNoteId,
+        );
         if (!existing) {
           return currentStore;
         }
         const updatedItem: NoteItem = {
           ...existing,
-          title: title || 'Untitled note',
+          title: title || "Untitled note",
           body,
           updatedAt: nowIso(),
         };
@@ -96,7 +136,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
       const timestamp = nowIso();
       const nextNote: NoteItem = {
         id: createId(),
-        title: title || 'Untitled note',
+        title: title || "Untitled note",
         body,
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -107,8 +147,8 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
       }));
     }
 
-    setNoteTitle('');
-    setNoteBody('');
+    setNoteTitle("");
+    setNoteBody("");
     return true;
   };
 
@@ -120,8 +160,8 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
 
   const cancelNoteEdit = () => {
     setEditingNoteId(null);
-    setNoteTitle('');
-    setNoteBody('');
+    setNoteTitle("");
+    setNoteBody("");
   };
 
   const deleteNote = (id: string) => {
@@ -142,7 +182,9 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
 
     if (editingTodoId) {
       setStore((currentStore) => {
-        const existing = currentStore.todos.find((item) => item.id === editingTodoId);
+        const existing = currentStore.todos.find(
+          (item) => item.id === editingTodoId,
+        );
         if (!existing) {
           return currentStore;
         }
@@ -172,7 +214,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
       }));
     }
 
-    setTodoTitle('');
+    setTodoTitle("");
     return true;
   };
 
@@ -183,7 +225,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
 
   const cancelTodoEdit = () => {
     setEditingTodoId(null);
-    setTodoTitle('');
+    setTodoTitle("");
   };
 
   const deleteTodo = (id: string) => {
@@ -214,6 +256,75 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
     });
   };
 
+  const handleLinkSubmit = () => {
+    const url = toOpenableUrl(linkUrlInput);
+    const description = linkDescriptionInput.trim();
+    if (!url) {
+      return false;
+    }
+
+    if (linkEditingId) {
+      setStore((currentStore) => {
+        const existing = currentStore.links.find(
+          (item) => item.id === linkEditingId,
+        );
+        if (!existing) {
+          return currentStore;
+        }
+        const updatedItem: LinkItem = {
+          ...existing,
+          url,
+          description,
+          updatedAt: nowIso(),
+        };
+        return {
+          ...currentStore,
+          links: reorderWithUpdate(currentStore.links, updatedItem),
+        };
+      });
+      setLinkEditingId(null);
+    } else {
+      const timestamp = nowIso();
+      const nextLink: LinkItem = {
+        id: createId(),
+        url,
+        description,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      };
+      setStore((currentStore) => ({
+        ...currentStore,
+        links: [nextLink, ...currentStore.links],
+      }));
+    }
+
+    setLinkUrlInput("");
+    setLinkDescriptionInput("");
+    return true;
+  };
+
+  const editLink = (item: LinkItem) => {
+    setLinkUrlInput(item.url);
+    setLinkDescriptionInput(item.description);
+    setLinkEditingId(item.id);
+  };
+
+  const cancelLinkEdit = () => {
+    setLinkEditingId(null);
+    setLinkUrlInput("");
+    setLinkDescriptionInput("");
+  };
+
+  const deleteLink = (id: string) => {
+    setStore((currentStore) => ({
+      ...currentStore,
+      links: currentStore.links.filter((item) => item.id !== id),
+    }));
+    if (linkEditingId === id) {
+      cancelLinkEdit();
+    }
+  };
+
   const handleShoppingSubmit = () => {
     const label = shoppingLabel.trim();
     if (!label) {
@@ -222,7 +333,9 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
 
     if (editingShoppingId) {
       setStore((currentStore) => {
-        const existing = currentStore.shopping.find((item) => item.id === editingShoppingId);
+        const existing = currentStore.shopping.find(
+          (item) => item.id === editingShoppingId,
+        );
         if (!existing) {
           return currentStore;
         }
@@ -251,7 +364,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
       }));
     }
 
-    setShoppingLabel('');
+    setShoppingLabel("");
     return true;
   };
 
@@ -262,7 +375,7 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
 
   const cancelShoppingEdit = () => {
     setEditingShoppingId(null);
-    setShoppingLabel('');
+    setShoppingLabel("");
   };
 
   const deleteShopping = (id: string) => {
@@ -286,11 +399,17 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
     shoppingLabel,
     editingShoppingId,
     shoppingSearch,
+    linkUrlInput,
+    linkDescriptionInput,
+    linkEditingId,
+    linkSearch,
     deferredNoteSearch,
     deferredTodoSearch,
     deferredShoppingSearch,
+    deferredLinkSearch,
     notes,
     todos,
+    links,
     shoppingItems,
     setNoteTitle,
     setNoteBody,
@@ -299,6 +418,9 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
     setTodoSearch,
     setShoppingLabel,
     setShoppingSearch,
+    setLinkUrlInput,
+    setLinkDescriptionInput,
+    setLinkSearch,
     handleNoteSubmit,
     editNote,
     cancelNoteEdit,
@@ -312,5 +434,9 @@ export function useNotepadEntities(store: AppStore, setStore: Dispatch<SetStateA
     editShopping,
     cancelShoppingEdit,
     deleteShopping,
+    handleLinkSubmit,
+    editLink,
+    cancelLinkEdit,
+    deleteLink,
   };
 }

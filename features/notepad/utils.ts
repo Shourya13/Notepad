@@ -23,3 +23,14 @@ export const formatTime = (isoDate: string) => {
   const date = new Date(isoDate);
   return date.toLocaleString();
 };
+
+export const toOpenableUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+};
