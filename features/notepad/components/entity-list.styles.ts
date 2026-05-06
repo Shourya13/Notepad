@@ -1,63 +1,65 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 import { Fonts } from '@/constants/theme';
+import { BorderRadius, Spacing, Shadows, FontSizes } from '@/lib/design-tokens';
 
 export const entityListStyles = StyleSheet.create({
   listArea: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 6,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
     paddingBottom: 110,
-    gap: 12,
+    gap: Spacing.md,
   },
   emptyState: {
-    borderRadius: 20,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
+    ...Shadows.subtle,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: FontSizes.sm,
     lineHeight: 20,
     fontFamily: Fonts.sans,
   },
   card: {
-    borderRadius: 20,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 10,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.md + 2,
+    paddingVertical: Spacing.md,
+    gap: Spacing.md,
+    ...Shadows.subtle,
   },
   cardTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: Spacing.md,
   },
   leadingIconWrap: {
     width: 44,
     height: 44,
-    borderRadius: 999,
+    borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardTextWrap: {
     flex: 1,
-    gap: 2,
+    gap: Spacing.xs,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: FontSizes.lg,
     lineHeight: 24,
     fontFamily: Fonts.rounded,
+    fontWeight: '600',
   },
   cardSubtext: {
-    fontSize: 13,
+    fontSize: FontSizes.sm,
     lineHeight: 18,
     fontFamily: Fonts.sans,
   },
   actionsCol: {
-    gap: 4,
+    gap: Spacing.xs,
   },
   iconTapArea: {
     width: 28,

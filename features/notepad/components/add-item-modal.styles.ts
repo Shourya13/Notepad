@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 import { Fonts } from '@/constants/theme';
+import { BorderRadius, Spacing, Shadows, FontSizes, ComponentSizes } from '@/lib/design-tokens';
 
 export const addItemModalStyles = StyleSheet.create({
   overlay: {
@@ -11,55 +12,59 @@ export const addItemModalStyles = StyleSheet.create({
     flex: 1,
   },
   sheet: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderTopWidth: 1,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 24,
-    gap: 10,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xxl,
+    gap: Spacing.md,
+    ...Shadows.elevated,
   },
   sheetHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: Spacing.md,
   },
   sheetTitle: {
-    fontSize: 20,
+    fontSize: FontSizes.xl,
     lineHeight: 26,
     fontFamily: Fonts.rounded,
+    fontWeight: '600',
   },
   closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    borderWidth: 1,
+    width: ComponentSizes.buttonMd,
+    height: ComponentSizes.buttonMd,
+    borderRadius: BorderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
+    ...Shadows.subtle,
   },
   input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    fontSize: FontSizes.base,
     lineHeight: 20,
+    ...Shadows.subtle,
   },
   textArea: {
     minHeight: 120,
     maxHeight: 180,
   },
   submitButton: {
-    marginTop: 2,
-    borderRadius: 12,
-    paddingVertical: 12,
+    marginTop: Spacing.xs,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.subtle,
   },
   submitText: {
-    color: '#fff',
-    fontSize: 15,
+    fontSize: FontSizes.base,
     lineHeight: 20,
     fontFamily: Fonts.sans,
+    fontWeight: '600',
   },
 });

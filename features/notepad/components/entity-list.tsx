@@ -1,6 +1,5 @@
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Linking from "expo-linking";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 import {
   LinkItem,
@@ -13,6 +12,7 @@ import { formatTime, toOpenableUrl } from "../utils";
 
 import { UiPalette } from "@/lib/themes";
 import { entityListStyles as styles } from "./entity-list.styles";
+import { SwipeableCard } from "./swipeable-card";
 
 type Props = {
   activeSection: SectionKey;
@@ -79,372 +79,165 @@ export function EntityList({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {!isHydrated ? (
+        {/* Loading State */}
+        {!isHydrated && (
           <View
             style={[
               styles.emptyState,
-              { backgroundColor: palette.panel, borderColor: palette.border },
+              { backgroundColor: palette.surface },
             ]}
           >
-            <Text style={[styles.emptyText, { color: palette.text }]}>
+            <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
               Loading saved data...
             </Text>
           </View>
-        ) : null}
+        )}
 
-        {isHydrated && activeSection === "notes" ? (
-          notes.length === 0 ? (
-            <View
-              style={[
-                styles.emptyState,
-                { backgroundColor: palette.panel, borderColor: palette.border },
-              ]}
-            >
-              <Text style={[styles.emptyText, { color: palette.text }]}>
-                {deferredNoteSearch
-                  ? "No notes match this search."
-                  : "No notes yet. Tap + to add your first note."}
-              </Text>
-            </View>
-          ) : (
-            notes.map((item) => (
+        {/* NOTES SECTION */}
+        {isHydrated && activeSection === "notes" && (
+          <>
+            {notes.length === 0 ? (
               <View
-                key={item.id}
                 style={[
-                  styles.card,
-                  {
-                    backgroundColor: palette.panel,
-                    borderColor: palette.border,
-                  },
+                  styles.emptyState,
+                  { backgroundColor: palette.surface },
                 ]}
               >
-                <View style={styles.cardTopRow}>
-                  <View
-                    style={[
-                      styles.leadingIconWrap,
-                      { backgroundColor: "#ffffff" },
-                    ]}
-                  >
-                    <MaterialIcons
-                      color={palette.accent}
-                      name="sticky-note-2"
-                      size={18}
-                    />
-                  </View>
-                  <View style={styles.cardTextWrap}>
-                    <Text
-                      style={[styles.cardTitle, { color: palette.text }]}
-                      numberOfLines={1}
-                    >
-                      {item.title}
-                    </Text>
-                    <Text
-                      style={[styles.cardSubtext, { color: palette.muted }]}
-                      numberOfLines={2}
-                    >
-                      {item.body || "No content"}
-                    </Text>
-                  </View>
-                  <View style={styles.actionsCol}>
-                    <Pressable
-                      onPress={() => onEditNote(item)}
-                      style={styles.iconTapArea}
-                    >
-                      <MaterialIcons
-                        color={palette.text}
-                        name="edit"
-                        size={18}
-                      />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => onDeleteNote(item.id)}
-                      style={styles.iconTapArea}
-                    >
-                      <MaterialIcons
-                        color={palette.danger}
-                        name="close"
-                        size={18}
-                      />
-                    </Pressable>
-                  </View>
-                </View>
-                <Text style={[styles.timeText, { color: palette.muted }]}>
-                  {formatTime(item.updatedAt)}
+                <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
+                  {deferredNoteSearch
+                    ? "No notes match this search."
+                    : "No notes yet. Tap + to add your first note."}
                 </Text>
               </View>
-            ))
-          )
-        ) : null}
+            ) : (
+              notes.map((item) => (
+                <SwipeableCard
+                  key={item.id}
+                  id={item.id}
+                  icon="sticky-note-2"
+                  iconColor={palette.accent}
+                  title={item.title || "Untitled Note"}
+                  subtitle={item.body?.slice(0, 50) || "No content"}
+                  timestamp={formatTime(item.updatedAt)}
+                  palette={palette}
+                  onPress={() => onEditNote(item)}
+                  onLeftSwipe={() => onDeleteNote(item.id)}
+                  showDoneAction={false}
+                />
+              ))
+            )}
+          </>
+        )}
 
-        {isHydrated && activeSection === "todos" ? (
-          todos.length === 0 ? (
-            <View
-              style={[
-                styles.emptyState,
-                { backgroundColor: palette.panel, borderColor: palette.border },
-              ]}
-            >
-              <Text style={[styles.emptyText, { color: palette.text }]}>
-                {deferredTodoSearch
-                  ? "No tasks match this search."
-                  : "No tasks yet. Tap + to add your first task."}
-              </Text>
-            </View>
-          ) : (
-            todos.map((item) => (
+        {/* TODOS SECTION */}
+        {isHydrated && activeSection === "todos" && (
+          <>
+            {todos.length === 0 ? (
               <View
-                key={item.id}
                 style={[
-                  styles.card,
-                  {
-                    backgroundColor: palette.panel,
-                    borderColor: palette.border,
-                  },
+                  styles.emptyState,
+                  { backgroundColor: palette.surface },
                 ]}
               >
-                <View style={styles.cardTopRow}>
-                  <View
-                    style={[
-                      styles.leadingIconWrap,
-                      { backgroundColor: "#ffffff" },
-                    ]}
-                  >
-                    <MaterialIcons
-                      color={item.done ? palette.success : palette.accent}
-                      name="checklist"
-                      size={18}
-                    />
-                  </View>
-                  <View style={styles.cardTextWrap}>
-                    <Text
-                      style={[
-                        styles.cardTitle,
-                        {
-                          color: palette.text,
-                          textDecorationLine: item.done
-                            ? "line-through"
-                            : "none",
-                        },
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {item.title}
-                    </Text>
-                    <Text
-                      style={[styles.cardSubtext, { color: palette.muted }]}
-                    >
-                      {item.done ? "Done" : "Open"}
-                    </Text>
-                  </View>
-                  <View style={styles.actionsCol}>
-                    <Pressable
-                      onPress={() => onToggleTodo(item.id)}
-                      style={styles.iconTapArea}
-                    >
-                      <MaterialIcons
-                        color={item.done ? palette.success : palette.accent}
-                        name="done"
-                        size={18}
-                      />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => onEditTodo(item)}
-                      style={styles.iconTapArea}
-                    >
-                      <MaterialIcons
-                        color={palette.text}
-                        name="edit"
-                        size={18}
-                      />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => onDeleteTodo(item.id)}
-                      style={styles.iconTapArea}
-                    >
-                      <MaterialIcons
-                        color={palette.danger}
-                        name="close"
-                        size={18}
-                      />
-                    </Pressable>
-                  </View>
-                </View>
-                <Text style={[styles.timeText, { color: palette.muted }]}>
-                  {formatTime(item.updatedAt)}
+                <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
+                  {deferredTodoSearch
+                    ? "No tasks match this search."
+                    : "No tasks yet. Tap + to add your first task."}
                 </Text>
               </View>
-            ))
-          )
-        ) : null}
+            ) : (
+              todos.map((item) => (
+                <SwipeableCard
+                  key={item.id}
+                  id={item.id}
+                  icon="checklist"
+                  iconColor={item.done ? palette.success : palette.accent}
+                  title={item.title || "Untitled Task"}
+                  subtitle={item.done ? "Completed" : "Pending"}
+                  timestamp={formatTime(item.updatedAt)}
+                  palette={palette}
+                  isDone={item.done}
+                  onPress={() => onEditTodo(item)}
+                  onLeftSwipe={() => onDeleteTodo(item.id)}
+                  onRightSwipe={() => onToggleTodo(item.id)}
+                  showDoneAction={true}
+                />
+              ))
+            )}
+          </>
+        )}
 
-        {isHydrated && activeSection === "shopping" ? (
-          shoppingItems.length === 0 ? (
-            <View
-              style={[
-                styles.emptyState,
-                { backgroundColor: palette.panel, borderColor: palette.border },
-              ]}
-            >
-              <Text style={[styles.emptyText, { color: palette.text }]}>
-                {deferredShoppingSearch
-                  ? "No shopping items match this search."
-                  : "No shopping items yet. Tap + to add your first item."}
-              </Text>
-            </View>
-          ) : (
-            shoppingItems.map((item) => (
+        {/* SHOPPING SECTION */}
+        {isHydrated && activeSection === "shopping" && (
+          <>
+            {shoppingItems.length === 0 ? (
               <View
-                key={item.id}
                 style={[
-                  styles.card,
-                  {
-                    backgroundColor: palette.panel,
-                    borderColor: palette.border,
-                  },
+                  styles.emptyState,
+                  { backgroundColor: palette.surface },
                 ]}
               >
-                <View style={styles.cardTopRow}>
-                  <View
-                    style={[
-                      styles.leadingIconWrap,
-                      { backgroundColor: "#ffffff" },
-                    ]}
-                  >
-                    <MaterialIcons
-                      color={palette.accent}
-                      name="shopping-cart"
-                      size={18}
-                    />
-                  </View>
-                  <View style={styles.cardTextWrap}>
-                    <Text
-                      style={[styles.cardTitle, { color: palette.text }]}
-                      numberOfLines={1}
-                    >
-                      {item.label}
-                    </Text>
-                    <Text
-                      style={[styles.cardSubtext, { color: palette.muted }]}
-                    >
-                      Shopping item
-                    </Text>
-                  </View>
-                  <View style={styles.actionsCol}>
-                    <Pressable
-                      onPress={() => onEditShopping(item)}
-                      style={styles.iconTapArea}
-                    >
-                      <MaterialIcons
-                        color={palette.text}
-                        name="edit"
-                        size={18}
-                      />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => onDeleteShopping(item.id)}
-                      style={styles.iconTapArea}
-                    >
-                      <MaterialIcons
-                        color={palette.danger}
-                        name="close"
-                        size={18}
-                      />
-                    </Pressable>
-                  </View>
-                </View>
-                <Text style={[styles.timeText, { color: palette.muted }]}>
-                  {formatTime(item.updatedAt)}
+                <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
+                  {deferredShoppingSearch
+                    ? "No shopping items match this search."
+                    : "No shopping items yet. Tap + to add your first item."}
                 </Text>
               </View>
-            ))
-          )
-        ) : null}
+            ) : (
+              shoppingItems.map((item) => (
+                <SwipeableCard
+                  key={item.id}
+                  id={item.id}
+                  icon="shopping-cart"
+                  iconColor={palette.accent}
+                  title={item.label || "Untitled Item"}
+                  subtitle="Shopping item"
+                  timestamp={formatTime(item.updatedAt)}
+                  palette={palette}
+                  onPress={() => onEditShopping(item)}
+                  onLeftSwipe={() => onDeleteShopping(item.id)}
+                  showDoneAction={false}
+                />
+              ))
+            )}
+          </>
+        )}
 
-        {isHydrated && activeSection === "links" ? (
-          links.length === 0 ? (
-            <View
-              style={[
-                styles.emptyState,
-                { backgroundColor: palette.panel, borderColor: palette.border },
-              ]}
-            >
-              <Text style={[styles.emptyText, { color: palette.text }]}>
-                {deferredLinkSearch
-                  ? "No links match this search."
-                  : "No links yet. Tap + to add your first link."}
-              </Text>
-            </View>
-          ) : (
-            links.map((item) => (
+        {/* LINKS SECTION */}
+        {isHydrated && activeSection === "links" && (
+          <>
+            {links.length === 0 ? (
               <View
-                key={item.id}
                 style={[
-                  styles.card,
-                  {
-                    backgroundColor: palette.panel,
-                    borderColor: palette.border,
-                  },
+                  styles.emptyState,
+                  { backgroundColor: palette.surface },
                 ]}
               >
-                <View style={styles.cardTopRow}>
-                  <View
-                    style={[
-                      styles.leadingIconWrap,
-                      { backgroundColor: "#ffffff" },
-                    ]}
-                  >
-                    <MaterialIcons
-                      color={palette.accent}
-                      name="link"
-                      size={18}
-                    />
-                  </View>
-                  <View style={styles.cardTextWrap}>
-                    <Pressable onPress={() => void openLink(item.url)}>
-                      <Text
-                        style={[styles.cardTitle, { color: palette.accent }]}
-                        numberOfLines={1}
-                      >
-                        {item.url}
-                      </Text>
-                    </Pressable>
-                    <Text
-                      style={[styles.cardSubtext, { color: palette.muted }]}
-                      numberOfLines={2}
-                    >
-                      {item.description || "No description"}
-                    </Text>
-                  </View>
-                  <View style={styles.actionsCol}>
-                    <Pressable
-                      onPress={() => onEditLink(item)}
-                      style={styles.iconTapArea}
-                    >
-                      <MaterialIcons
-                        color={palette.text}
-                        name="edit"
-                        size={18}
-                      />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => onDeleteLink(item.id)}
-                      style={styles.iconTapArea}
-                    >
-                      <MaterialIcons
-                        color={palette.danger}
-                        name="close"
-                        size={18}
-                      />
-                    </Pressable>
-                  </View>
-                </View>
-                <Text style={[styles.timeText, { color: palette.muted }]}>
-                  {formatTime(item.updatedAt)}
+                <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
+                  {deferredLinkSearch
+                    ? "No links match this search."
+                    : "No links yet. Tap + to add your first link."}
                 </Text>
               </View>
-            ))
-          )
-        ) : null}
+            ) : (
+              links.map((item) => (
+                <SwipeableCard
+                  key={item.id}
+                  id={item.id}
+                  icon="link"
+                  iconColor={palette.accent}
+                  title={item.url || "No URL"}
+                  subtitle={item.description?.slice(0, 50) || "No description"}
+                  timestamp={formatTime(item.updatedAt)}
+                  palette={palette}
+                  onPress={() => onEditLink(item)}
+                  onLeftSwipe={() => onDeleteLink(item.id)}
+                  showDoneAction={false}
+                />
+              ))
+            )}
+          </>
+        )}
       </ScrollView>
     </View>
   );

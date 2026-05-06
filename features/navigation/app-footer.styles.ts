@@ -1,28 +1,31 @@
 import { StyleSheet } from 'react-native';
 
 import { Fonts } from '@/constants/theme';
+import { Spacing, BorderRadius, Shadows, FontSizes } from '@/lib/design-tokens';
 
 export const appFooterStyles = StyleSheet.create({
   footer: {
-    borderTopWidth: 1,
-    paddingHorizontal: 14,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingHorizontal: Spacing.md + 2,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.md,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
+    ...Shadows.elevated,
   },
   item: {
     width: 74,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
-    paddingVertical: 4,
-    borderRadius: 10,
+    gap: Spacing.xs,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.md,
   },
   label: {
-    fontSize: 11,
+    fontSize: FontSizes.xs,
     lineHeight: 14,
     fontFamily: Fonts.sans,
+    fontWeight: '500',
   },
 });
