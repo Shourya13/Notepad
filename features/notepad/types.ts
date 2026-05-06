@@ -24,6 +24,7 @@ export type TodoItem = {
 export type ShoppingItem = {
   id: string;
   label: string;
+  quantity?: string;
   createdAt: string;
   updatedAt: string;
 };

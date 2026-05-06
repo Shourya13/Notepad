@@ -150,7 +150,7 @@ export function EntityList({
                 <SwipeableCard
                   key={item.id}
                   id={item.id}
-                  icon="checklist"
+                  icon={item.done ? "task-alt" : "radio-button-unchecked"}
                   iconColor={item.done ? palette.success : palette.accent}
                   title={item.title || "Untitled Task"}
                   subtitle={item.done ? "Completed" : "Pending"}
@@ -190,7 +190,11 @@ export function EntityList({
                   id={item.id}
                   icon="shopping-cart"
                   iconColor={palette.accent}
-                  title={item.label || "Untitled Item"}
+                  title={
+                    item.quantity
+                      ? `${item.label || "Untitled Item"}  ·  ${item.quantity}`
+                      : item.label || "Untitled Item"
+                  }
                   subtitle="Shopping item"
                   timestamp={formatTime(item.updatedAt)}
                   palette={palette}

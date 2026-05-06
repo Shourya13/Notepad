@@ -96,7 +96,7 @@ export function IngredientForm({ visible, palette, initial, onClose, onSubmit }:
   return (
     <Modal animationType="none" onRequestClose={onClose} transparent visible={visible}>
       <KeyboardAvoidingView
-        behavior={Platform.select({ ios: 'padding', default: undefined })}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex}
       >
         <Animated.View style={[styles.overlay, { backgroundColor: palette.overlay, opacity: fadeAnim }]}>
@@ -122,9 +122,12 @@ export function IngredientForm({ visible, palette, initial, onClose, onSubmit }:
 
             <TextInput
               autoFocus
+              blurOnSubmit={false}
               onChangeText={setName}
+              onSubmitEditing={submit}
               placeholder="Ingredient (e.g. onion)"
               placeholderTextColor={palette.muted}
+              returnKeyType="done"
               style={[styles.input, { color: palette.text, backgroundColor: palette.panelSoft }]}
               value={name}
             />

@@ -160,7 +160,7 @@ export default function NotepadApp() {
         style={styles.flex}
         behavior={Platform.select({
           ios: "padding",
-          default: undefined,
+          default: "height",
         })}
       >
         <View style={styles.headerRow}>
@@ -325,6 +325,7 @@ export default function NotepadApp() {
           todoTitle={entities.todoTitle}
           editingTodoId={entities.editingTodoId}
           shoppingLabel={entities.shoppingLabel}
+          shoppingQuantity={entities.shoppingQuantity}
           editingShoppingId={entities.editingShoppingId}
           linkUrlInput={entities.linkUrlInput}
           linkDescriptionInput={entities.linkDescriptionInput}
@@ -333,6 +334,7 @@ export default function NotepadApp() {
           setNoteBody={entities.setNoteBody}
           setTodoTitle={entities.setTodoTitle}
           setShoppingLabel={entities.setShoppingLabel}
+          setShoppingQuantity={entities.setShoppingQuantity}
           setLinkUrlInput={entities.setLinkUrlInput}
           setLinkDescriptionInput={entities.setLinkDescriptionInput}
           onClose={closeComposer}

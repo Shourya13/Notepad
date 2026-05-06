@@ -17,7 +17,14 @@ type Props = {
   onEditAction: (stepId: string) => void;
   onDeleteStep: (stepId: string) => void;
   onAddIngredient: () => void;
-  onContainerLayout: (y: number) => void;
+  onAddAction: () => void;
+  /**
+   * Receives a ref to the inner View whose top is the y=0 origin used by
+   * `onStepLayout` measurements. The parent uses this to convert absolute
+   * pointer coordinates into list-local coordinates via measureInWindow.
+   */
+  registerListRef: (node: View | null) => void;
+  onListLayout: () => void;
   onStepLayout: (stepId: string, y: number, height: number) => void;
   onStepDragStart: (stepId: string, x: number, y: number) => void;
   onStepDragMove: (x: number, y: number) => void;
@@ -52,7 +59,9 @@ export function Timeline({
   onEditAction,
   onDeleteStep,
   onAddIngredient,
-  onContainerLayout,
+  onAddAction,
+  registerListRef,
+  onListLayout,
   onStepLayout,
   onStepDragStart,
   onStepDragMove,
@@ -63,8 +72,10 @@ export function Timeline({
   return (
     <View style={styles.container}>
       {isEmpty ? (
-        <View
-          onLayout={(e) => onContainerLayout(e.nativeEvent.layout.y)}
+        <Pressable
+          ref={registerListRef as any}
+          onLayout={onListLayout}
+          onPress={onAddAction}
           style={[styles.emptyState, { backgroundColor: palette.panel }]}
         >
           <MaterialIcons color={palette.muted} name="timeline" size={26} />
@@ -72,15 +83,16 @@ export function Timeline({
             Empty timeline
           </Text>
           <Text style={[styles.emptyText, { color: palette.muted }]}>
-            Drag actions from below or tap to append.
+            Tap to add your first action, or add an ingredient below.
           </Text>
           {dropIndex === 0 ? (
             <View style={[styles.dropIndicator, { backgroundColor: palette.accent }]} />
           ) : null}
-        </View>
+        </Pressable>
       ) : (
         <View
-          onLayout={(e) => onContainerLayout(e.nativeEvent.layout.y)}
+          ref={registerListRef}
+          onLayout={onListLayout}
           style={styles.stepList}
         >
           {dropIndex === 0 ? (
@@ -134,7 +146,7 @@ export function Timeline({
                         onPress={() => onDeleteStep(step.id)}
                         style={styles.deleteHit}
                       >
-                        <MaterialIcons color={palette.muted} name="close" size={16} />
+                        <MaterialIcons color={palette.muted} name="close" size={20} />
                       </Pressable>
                       <StepDragHandle
                         stepId={step.id}
@@ -182,7 +194,7 @@ export function Timeline({
                           onPress={() => onDeleteStep(step.id)}
                           style={styles.deleteHit}
                         >
-                          <MaterialIcons color={palette.muted} name="close" size={16} />
+                          <MaterialIcons color={palette.muted} name="close" size={20} />
                         </Pressable>
                         <StepDragHandle
                           stepId={step.id}
@@ -205,15 +217,26 @@ export function Timeline({
         </View>
       )}
 
-      <Pressable
-        onPress={onAddIngredient}
-        style={[styles.addButton, { backgroundColor: palette.accentSoft }]}
-      >
-        <MaterialIcons color={palette.accent} name="add" size={18} />
-        <Text style={[styles.addButtonText, { color: palette.accent }]}>
-          Add ingredient
-        </Text>
-      </Pressable>
+      <View style={styles.ctaRow}>
+        <Pressable
+          onPress={onAddIngredient}
+          style={[styles.ctaButton, styles.ctaSecondary, { backgroundColor: palette.panel, borderColor: palette.border }]}
+        >
+          <MaterialIcons color={palette.text} name="label" size={18} />
+          <Text style={[styles.ctaText, { color: palette.text }]}>
+            Ingredient
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={onAddAction}
+          style={[styles.ctaButton, styles.ctaPrimary, { backgroundColor: palette.accent }]}
+        >
+          <MaterialIcons color="#fff" name="playlist-add" size={18} />
+          <Text style={[styles.ctaText, { color: '#fff' }]}>
+            Add action
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }

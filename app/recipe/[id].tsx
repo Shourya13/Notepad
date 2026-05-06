@@ -6,8 +6,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     Animated,
     KeyboardAvoidingView,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
     Platform,
     Pressable,
     ScrollView,
@@ -21,7 +19,7 @@ import { useNotepadStore } from '@/features/notepad/use-notepad-store';
 import { createId } from '@/features/notepad/utils';
 import { ACTION_CONFIG } from '@/features/recipes/action-config';
 import { ActionEditSheet } from '@/features/recipes/components/action-edit-sheet';
-import { ActionPalette } from '@/features/recipes/components/action-palette';
+import { ActionPicker } from '@/features/recipes/components/action-picker';
 import { IngredientForm } from '@/features/recipes/components/ingredient-form';
 import { Timeline } from '@/features/recipes/components/timeline';
 import { ActionKind, ActionStep, Ingredient, Step } from '@/features/recipes/types';
@@ -55,6 +53,10 @@ export default function RecipeEditorScreen() {
   const [editingIngredientStepId, setEditingIngredientStepId] = useState<string | null>(null);
   const [editingActionStepId, setEditingActionStepId] = useState<string | null>(null);
 
+  // Action picker sheet state
+  const [actionPickerOpen, setActionPickerOpen] = useState(false);
+  const [actionInsertIndex, setActionInsertIndex] = useState<number | null>(null);
+
   // Drag state for action chips dropping into the timeline (or step reorder)
   type Drag =
     | { kind: 'new'; action: ActionKind }
@@ -65,9 +67,10 @@ export default function RecipeEditorScreen() {
   const ghostY = useRef(new Animated.Value(0)).current;
   const stepLayoutsRef = useRef<Map<string, { y: number; height: number }>>(new Map());
   const stepOrderRef = useRef<string[]>([]);
-  const timelineLocalYRef = useRef(0); // y of timeline within scroll content
-  const scrollOriginYRef = useRef(0); // absolute y of ScrollView on screen
-  const scrollOffsetYRef = useRef(0);
+  const stepListRef = useRef<View | null>(null);
+  // Window-Y of the step list's top edge. Refreshed on drag start, drag move
+  // and on scroll so dragging while scrolling stays accurate.
+  const listWindowYRef = useRef(0);
   const lastDropIndexRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -182,9 +185,19 @@ export default function RecipeEditorScreen() {
     setSteps(recipe.id, next);
   };
 
+  const measureList = () => {
+    const node = stepListRef.current;
+    if (!node) return;
+    node.measureInWindow((_x, y) => {
+      if (Number.isFinite(y)) {
+        listWindowYRef.current = y;
+      }
+    });
+  };
+
   const computeDropIndex = (absoluteY: number): number => {
-    // Convert absolute screen Y -> y within timeline content
-    const localY = absoluteY - scrollOriginYRef.current + scrollOffsetYRef.current - timelineLocalYRef.current;
+    // Convert absolute screen Y -> y within step list (origin = list top)
+    const localY = absoluteY - listWindowYRef.current;
     const order = stepOrderRef.current;
     if (order.length === 0) {
       return 0;
@@ -201,6 +214,7 @@ export default function RecipeEditorScreen() {
   };
 
   const onDragStart = (kind: ActionKind, x: number, y: number) => {
+    measureList();
     setDrag({ kind: 'new', action: kind });
     ghostX.setValue(x);
     ghostY.setValue(y);
@@ -211,6 +225,7 @@ export default function RecipeEditorScreen() {
   };
 
   const onStepDragStart = (stepId: string, x: number, y: number) => {
+    measureList();
     setDrag({ kind: 'reorder', stepId });
     ghostX.setValue(x);
     ghostY.setValue(y);
@@ -247,8 +262,9 @@ export default function RecipeEditorScreen() {
     }
   };
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    scrollOffsetYRef.current = event.nativeEvent.contentOffset.y;
+  const handleScroll = () => {
+    // Refresh the cached window-Y while the user scrolls during a drag.
+    measureList();
   };
 
   const editingActionStep: ActionStep | null = useMemo(() => {
@@ -299,7 +315,7 @@ export default function RecipeEditorScreen() {
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.select({ ios: 'padding', default: undefined })}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.headerRow}>
           <Pressable
@@ -318,9 +334,6 @@ export default function RecipeEditorScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
-          onLayout={(e) => {
-            scrollOriginYRef.current = e.nativeEvent.layout.y;
-          }}
           onScroll={handleScroll}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
@@ -359,9 +372,14 @@ export default function RecipeEditorScreen() {
             onEditAction={(stepId) => setEditingActionStepId(stepId)}
             onDeleteStep={deleteStep}
             onAddIngredient={openAddIngredient}
-            onContainerLayout={(y) => {
-              timelineLocalYRef.current = y;
+            onAddAction={() => {
+              setActionInsertIndex(null);
+              setActionPickerOpen(true);
             }}
+            registerListRef={(node) => {
+              stepListRef.current = node;
+            }}
+            onListLayout={measureList}
             onStepLayout={(stepId, y, height) => {
               stepLayoutsRef.current.set(stepId, { y, height });
             }}
@@ -371,12 +389,20 @@ export default function RecipeEditorScreen() {
           />
         </ScrollView>
 
-        <ActionPalette
+        <ActionPicker
+          visible={actionPickerOpen}
           palette={palette}
-          onTap={appendAction}
-          onDragStart={onDragStart}
-          onDragMove={onDragMove}
-          onDragEnd={onDragEnd}
+          insertIndex={actionInsertIndex}
+          totalSteps={recipe.steps.length}
+          onClose={() => setActionPickerOpen(false)}
+          onSelect={(action) => {
+            if (actionInsertIndex == null) {
+              appendAction(action);
+            } else {
+              insertActionAt(action, actionInsertIndex);
+            }
+            setActionInsertIndex(null);
+          }}
         />
 
         {drag ? (

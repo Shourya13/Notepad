@@ -23,6 +23,7 @@ export function useNotepadEntities(
   const [todoSearch, setTodoSearch] = useState("");
 
   const [shoppingLabel, setShoppingLabel] = useState("");
+  const [shoppingQuantity, setShoppingQuantity] = useState("");
   const [editingShoppingId, setEditingShoppingId] = useState<string | null>(
     null,
   );
@@ -327,6 +328,7 @@ export function useNotepadEntities(
 
   const handleShoppingSubmit = () => {
     const label = shoppingLabel.trim();
+    const quantity = shoppingQuantity.trim();
     if (!label) {
       return false;
     }
@@ -342,6 +344,7 @@ export function useNotepadEntities(
         const updatedItem: ShoppingItem = {
           ...existing,
           label,
+          quantity: quantity || undefined,
           updatedAt: nowIso(),
         };
         return {
@@ -355,6 +358,7 @@ export function useNotepadEntities(
       const nextItem: ShoppingItem = {
         id: createId(),
         label,
+        quantity: quantity || undefined,
         createdAt: timestamp,
         updatedAt: timestamp,
       };
@@ -365,17 +369,20 @@ export function useNotepadEntities(
     }
 
     setShoppingLabel("");
+    setShoppingQuantity("");
     return true;
   };
 
   const editShopping = (item: ShoppingItem) => {
     setShoppingLabel(item.label);
+    setShoppingQuantity(item.quantity ?? "");
     setEditingShoppingId(item.id);
   };
 
   const cancelShoppingEdit = () => {
     setEditingShoppingId(null);
     setShoppingLabel("");
+    setShoppingQuantity("");
   };
 
   const deleteShopping = (id: string) => {
@@ -397,6 +404,7 @@ export function useNotepadEntities(
     editingTodoId,
     todoSearch,
     shoppingLabel,
+    shoppingQuantity,
     editingShoppingId,
     shoppingSearch,
     linkUrlInput,
@@ -417,6 +425,7 @@ export function useNotepadEntities(
     setTodoTitle,
     setTodoSearch,
     setShoppingLabel,
+    setShoppingQuantity,
     setShoppingSearch,
     setLinkUrlInput,
     setLinkDescriptionInput,
