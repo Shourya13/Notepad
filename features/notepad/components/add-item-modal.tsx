@@ -1,16 +1,16 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect, useMemo, useRef } from 'react';
 import {
-  Animated,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    Animated,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from 'react-native';
 
 import { SectionKey } from '../types';

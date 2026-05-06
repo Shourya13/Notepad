@@ -2,13 +2,13 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef } from 'react';
 import {
-  Animated,
-  Easing,
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
+    Animated,
+    Easing,
+    Modal,
+    Pressable,
+    ScrollView,
+    Text,
+    View,
 } from 'react-native';
 
 import { UiPalette } from '@/lib/themes';

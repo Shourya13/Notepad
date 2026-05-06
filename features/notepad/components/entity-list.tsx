@@ -2,11 +2,11 @@ import * as Linking from "expo-linking";
 import { ScrollView, Text, View } from "react-native";
 
 import {
-  LinkItem,
-  NoteItem,
-  SectionKey,
-  ShoppingItem,
-  TodoItem,
+    LinkItem,
+    NoteItem,
+    SectionKey,
+    ShoppingItem,
+    TodoItem,
 } from "../types";
 import { formatTime, toOpenableUrl } from "../utils";
 
