@@ -206,7 +206,7 @@ export function SwipeableCard({
 
               {/* Done checkmark badge */}
               {isDone && (
-                <MaterialIcons name="check-circle" size={16} color={palette.success} style={styles.doneBadge} />
+                <MaterialIcons name="check-circle" size={24} color={palette.success} style={styles.doneBadge} />
               )}
             </View>
           </Pressable>
@@ -226,10 +226,17 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: '50%',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
     gap: Spacing.xs,
+  },
+  card: {
+    marginVertical: -1,
+    marginHorizontal: -1,
+    borderRadius: BorderRadius.lg,
+    ...Shadows.subtle,
   },
   actionBgLeft: {
     left: 0,
@@ -249,10 +256,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
-  },
-  card: {
-    borderRadius: BorderRadius.lg,
-    ...Shadows.subtle,
   },
   pressable: {
     flex: 1,
