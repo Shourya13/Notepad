@@ -27,6 +27,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="themes" options={{ headerShown: false }} />
+        <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </>

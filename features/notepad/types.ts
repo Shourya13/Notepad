@@ -1,8 +1,9 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
+import { Recipe } from "@/features/recipes/types";
 import { ThemeId, ThemeMode } from "@/lib/themes";
 
-export type SectionKey = "notes" | "todos" | "shopping" | "links";
+export type SectionKey = "notes" | "todos" | "shopping" | "links" | "recipes";
 
 export type NoteItem = {
   id: string;
@@ -45,6 +46,7 @@ export type AppStore = {
   todos: TodoItem[];
   shopping: ShoppingItem[];
   links: LinkItem[];
+  recipes: Recipe[];
   preferences: ThemePreferences;
 };
 
@@ -67,5 +69,9 @@ export const sectionMeta: Record<
   links: {
     title: "Links",
     icon: "link",
+  },
+  recipes: {
+    title: "Recipes",
+    icon: "restaurant-menu",
   },
 };

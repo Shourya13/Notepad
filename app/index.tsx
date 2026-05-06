@@ -22,6 +22,8 @@ import { EntityList } from "@/features/notepad/components/entity-list";
 import { SectionKey, sectionMeta } from "@/features/notepad/types";
 import { useNotepadEntities } from "@/features/notepad/use-notepad-entities";
 import { useNotepadStore } from "@/features/notepad/use-notepad-store";
+import { RecipeList } from "@/features/recipes/components/recipe-list";
+import { useRecipes } from "@/features/recipes/use-recipes";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { minimalThemes, resolveThemeMode } from "@/lib/themes";
 import { indexStyles as styles } from "./index.styles";
@@ -37,6 +39,7 @@ export default function NotepadApp() {
 
   const { store, setStore, isHydrated, storageError } = useNotepadStore();
   const entities = useNotepadEntities(store, setStore);
+  const recipesApi = useRecipes(store, setStore);
 
   const preferences = store.preferences;
   const resolvedThemeMode = resolveThemeMode(
@@ -75,7 +78,9 @@ export default function NotepadApp() {
         ? `${todoOpenCount} open | ${todoDoneCount} done`
         : activeSection === "shopping"
           ? `${store.shopping.length} items`
-          : `${store.links.length} links`;
+          : activeSection === "recipes"
+            ? `${store.recipes.length} recipes`
+            : `${store.links.length} links`;
 
   const activeMeta = sectionMeta[activeSection];
 
@@ -89,6 +94,11 @@ export default function NotepadApp() {
   };
 
   const openComposer = () => {
+    if (activeSection === "recipes") {
+      const recipe = recipesApi.createRecipe();
+      router.push({ pathname: "/recipe/[id]", params: { id: recipe.id } });
+      return;
+    }
     setItemModalOpen(true);
   };
 
@@ -196,14 +206,15 @@ export default function NotepadApp() {
           </View>
         ) : null}
 
-        <View
-          style={[
-            styles.searchWrap,
-            { backgroundColor: palette.panel },
-          ]}
-        >
-          <MaterialIcons color={palette.muted} name="search" size={18} />
-          {activeSection === "notes" ? (
+        {activeSection !== "recipes" ? (
+          <View
+            style={[
+              styles.searchWrap,
+              { backgroundColor: palette.panel },
+            ]}
+          >
+            <MaterialIcons color={palette.muted} name="search" size={18} />
+            {activeSection === "notes" ? (
             <TextInput
               onChangeText={entities.setNoteSearch}
               placeholder="Search notes..."
@@ -241,9 +252,21 @@ export default function NotepadApp() {
               value={entities.linkSearch}
             />
           ) : null}
-        </View>
+          </View>
+        ) : null}
 
-        <EntityList
+        {activeSection === "recipes" ? (
+          <RecipeList
+            recipes={recipesApi.recipes}
+            isHydrated={isHydrated}
+            palette={palette}
+            onOpen={(recipe) =>
+              router.push({ pathname: "/recipe/[id]", params: { id: recipe.id } })
+            }
+            onDelete={recipesApi.deleteRecipe}
+          />
+        ) : (
+          <EntityList
           activeSection={activeSection}
           isHydrated={isHydrated}
           palette={palette}
@@ -277,6 +300,7 @@ export default function NotepadApp() {
           }}
           onDeleteLink={entities.deleteLink}
         />
+        )}
 
         <Pressable
           onPress={openComposer}

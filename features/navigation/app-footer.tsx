@@ -5,7 +5,7 @@ import { appFooterStyles as styles } from './app-footer.styles';
 
 import { UiPalette } from '@/lib/themes';
 
-export type FooterKey = 'notes' | 'todos' | 'shopping' | 'links';
+export type FooterKey = 'notes' | 'todos' | 'shopping' | 'links' | 'recipes';
 
 type Props = {
   activeKey: FooterKey;
@@ -18,6 +18,7 @@ const meta: Record<FooterKey, { label: string; icon: keyof typeof MaterialIcons.
   todos: { label: 'Todo', icon: 'checklist' },
   shopping: { label: 'Shopping', icon: 'shopping-cart' },
   links: { label: 'Links', icon: 'link' },
+  recipes: { label: 'Recipes', icon: 'restaurant-menu' },
 };
 
 export function AppFooter({ activeKey, palette, onPress }: Props) {

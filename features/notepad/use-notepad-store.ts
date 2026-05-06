@@ -1,7 +1,7 @@
-import * as FileSystem from 'expo-file-system/legacy';
 import { useFocusEffect } from '@react-navigation/native';
-import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 import { startTransition, useCallback, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 
 import { AppStore } from './types';
 import { createEmptyStore } from './utils';
@@ -25,6 +25,7 @@ const tryParseStore = (rawValue: string | null): AppStore => {
       todos: Array.isArray(parsed.todos) ? parsed.todos : [],
       shopping: Array.isArray(parsed.shopping) ? parsed.shopping : [],
       links: Array.isArray(parsed.links) ? parsed.links : [],
+      recipes: Array.isArray(parsed.recipes) ? parsed.recipes : [],
       preferences: normalizeThemePreferences(parsed.preferences),
     };
   } catch {
