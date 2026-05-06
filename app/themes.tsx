@@ -1,3 +1,4 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -163,12 +164,14 @@ export default function ThemeSettingsScreen() {
         <Pressable
           onPress={() => router.back()}
           style={[styles.backButton, { borderColor: palette.border, backgroundColor: palette.panel }]}>
-          <Text style={[styles.backButtonText, { color: palette.text }]}>Back</Text>
+          <MaterialIcons name="arrow-back" size={18} color={palette.text} />
         </Pressable>
         <View style={styles.headerTextWrap}>
-          <Text style={[styles.headerTitle, { color: palette.text }]}>Theme Settings</Text>
-          <Text style={[styles.headerSubtext, { color: palette.muted }]}>
-            Minimal palettes with light and dark variants
+          <Text style={[styles.headerTitle, { color: palette.text, fontFamily: Fonts.rounded }]}>
+            Appearance
+          </Text>
+          <Text style={[styles.headerSubtext, { color: palette.muted, fontFamily: Fonts.sans }]}>
+            5 curated palettes · Inter typeface
           </Text>
         </View>
       </View>
@@ -177,13 +180,19 @@ export default function ThemeSettingsScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
+
+        {/* Mode selector */}
+        <View style={styles.sectionLabel}>
+          <Text style={[styles.sectionLabelText, { color: palette.muted, fontFamily: Fonts.mono }]}>
+            COLOR MODE
+          </Text>
+        </View>
         <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.panel }]}>
-          <Text style={[styles.cardTitle, { color: palette.text }]}>Mode</Text>
           <View style={styles.modeRow}>
             {THEME_MODES.map((modeKey) => {
               const active = store.preferences.mode === modeKey;
-              const modeLabel =
-                modeKey === 'system' ? 'System' : modeKey === 'light' ? 'Light' : 'Dark';
+              const icons = { system: 'brightness-auto', light: 'light-mode', dark: 'dark-mode' } as const;
+              const modeLabel = modeKey === 'system' ? 'Auto' : modeKey === 'light' ? 'Light' : 'Dark';
               return (
                 <Pressable
                   key={modeKey}
@@ -192,27 +201,42 @@ export default function ThemeSettingsScreen() {
                     styles.modeChip,
                     {
                       borderColor: active ? palette.accent : palette.border,
-                      backgroundColor: active ? palette.accentSoft : palette.panelSoft,
+                      backgroundColor: active ? palette.accentSoft : 'transparent',
                     },
                   ]}>
-                  <Text style={[styles.modeChipText, { color: active ? palette.text : palette.muted }]}>
+                  <MaterialIcons
+                    name={icons[modeKey]}
+                    size={16}
+                    color={active ? palette.accent : palette.muted}
+                  />
+                  <Text style={[
+                    styles.modeChipText,
+                    {
+                      color: active ? palette.text : palette.muted,
+                      fontFamily: Fonts.sans,
+                      fontWeight: active ? '600' : '400',
+                    },
+                  ]}>
                     {modeLabel}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
-          <Text style={[styles.helpText, { color: palette.muted }]}>
-            Active: {resolvedMode.toUpperCase()}
-          </Text>
         </View>
 
-        <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.panel }]}>
-          <Text style={[styles.cardTitle, { color: palette.text }]}>Palettes</Text>
+        {/* Theme list */}
+        <View style={styles.sectionLabel}>
+          <Text style={[styles.sectionLabelText, { color: palette.muted, fontFamily: Fonts.mono }]}>
+            PALETTE
+          </Text>
+        </View>
+        <View style={styles.themeList}>
           {THEME_IDS.map((themeId) => {
             const item = minimalThemes[themeId];
             const active = store.preferences.themeId === themeId;
-            const swatch = item[resolvedMode];
+            const lightSwatch = item.light;
+            const darkSwatch = item.dark;
 
             return (
               <Pressable
@@ -222,21 +246,41 @@ export default function ThemeSettingsScreen() {
                   styles.themeItem,
                   {
                     borderColor: active ? palette.accent : palette.border,
-                    backgroundColor: active ? palette.accentSoft : palette.panelSoft,
+                    backgroundColor: active ? palette.accentSoft : palette.panel,
                   },
                 ]}>
                 <View style={styles.themeTopRow}>
-                  <Text style={[styles.themeTitle, { color: active ? palette.text : palette.muted }]}>
-                    {item.title}
-                  </Text>
-                  <Text style={[styles.themeSource, { color: palette.muted }]}>{item.sourceLabel}</Text>
+                  <View style={styles.themeTitleWrap}>
+                    <Text style={[
+                      styles.themeTitle,
+                      { color: palette.text, fontFamily: Fonts.rounded, fontWeight: active ? '700' : '500' }
+                    ]}>
+                      {item.title}
+                    </Text>
+                    <Text style={[styles.themeSubtext, { color: palette.muted, fontFamily: Fonts.sans }]}>
+                      {item.subtitle}
+                    </Text>
+                  </View>
+                  {active && (
+                    <MaterialIcons name="check-circle" size={20} color={palette.accent} />
+                  )}
                 </View>
-                <Text style={[styles.themeSubtext, { color: palette.muted }]}>{item.subtitle}</Text>
-                <View style={styles.swatchRow}>
-                  <View style={[styles.swatch, { backgroundColor: swatch.background }]} />
-                  <View style={[styles.swatch, { backgroundColor: swatch.panel }]} />
-                  <View style={[styles.swatch, { backgroundColor: swatch.accent }]} />
-                  <View style={[styles.swatch, { backgroundColor: swatch.text }]} />
+
+                {/* Light + Dark swatch pair */}
+                <View style={styles.swatchPair}>
+                  <View style={styles.swatchHalf}>
+                    <View style={[styles.swatchDot, { backgroundColor: lightSwatch.background }]} />
+                    <View style={[styles.swatchDot, { backgroundColor: lightSwatch.panel }]} />
+                    <View style={[styles.swatchDot, styles.swatchDotLarge, { backgroundColor: lightSwatch.accent }]} />
+                    <View style={[styles.swatchDot, { backgroundColor: lightSwatch.text }]} />
+                  </View>
+                  <View style={[styles.swatchDivider, { backgroundColor: palette.border }]} />
+                  <View style={styles.swatchHalf}>
+                    <View style={[styles.swatchDot, { backgroundColor: darkSwatch.background }]} />
+                    <View style={[styles.swatchDot, { backgroundColor: darkSwatch.panel }]} />
+                    <View style={[styles.swatchDot, styles.swatchDotLarge, { backgroundColor: darkSwatch.accent }]} />
+                    <View style={[styles.swatchDot, { backgroundColor: darkSwatch.text }]} />
+                  </View>
                 </View>
               </Pressable>
             );
@@ -244,7 +288,9 @@ export default function ThemeSettingsScreen() {
         </View>
 
         {!isHydrated ? (
-          <Text style={[styles.loadingText, { color: palette.muted }]}>Loading preferences...</Text>
+          <Text style={[styles.loadingText, { color: palette.muted, fontFamily: Fonts.mono }]}>
+            Loading...
+          </Text>
         ) : null}
       </ScrollView>
     </SafeAreaView>
@@ -259,19 +305,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: 18,
+    paddingTop: 10,
+    paddingBottom: 6,
   },
   backButton: {
+    width: 38,
+    height: 38,
     borderWidth: 1,
-    borderRadius: 11,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-  },
-  backButtonText: {
-    fontSize: 14,
-    lineHeight: 18,
-    fontFamily: Fonts.sans,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTextWrap: {
     flex: 1,
@@ -279,89 +323,115 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     lineHeight: 30,
-    fontFamily: Fonts.rounded,
+    fontWeight: '600',
+    letterSpacing: -0.4,
   },
   headerSubtext: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 2,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 1,
   },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 32,
-    gap: 12,
+    paddingHorizontal: 18,
+    paddingTop: 6,
+    paddingBottom: 40,
+    gap: 6,
+  },
+  sectionLabel: {
+    paddingHorizontal: 4,
+    paddingTop: 14,
+    paddingBottom: 6,
+  },
+  sectionLabelText: {
+    fontSize: 10,
+    lineHeight: 14,
+    letterSpacing: 1.4,
+    fontWeight: '600',
   },
   card: {
     borderWidth: 1,
     borderRadius: 16,
-    padding: 14,
-    gap: 10,
-  },
-  cardTitle: {
-    fontSize: 16,
-    lineHeight: 22,
-    fontFamily: Fonts.rounded,
+    padding: 6,
   },
   modeRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+    gap: 6,
   },
   modeChip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
   },
   modeChipText: {
     fontSize: 13,
     lineHeight: 18,
-    fontFamily: Fonts.sans,
   },
-  helpText: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontFamily: Fonts.mono,
+  themeList: {
+    gap: 8,
   },
   themeItem: {
     borderWidth: 1,
-    borderRadius: 12,
-    padding: 11,
-    gap: 6,
+    borderRadius: 16,
+    padding: 14,
+    gap: 12,
   },
   themeTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 10,
+  },
+  themeTitleWrap: {
+    flex: 1,
+    gap: 2,
   },
   themeTitle: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontFamily: Fonts.rounded,
-  },
-  themeSource: {
-    fontSize: 11,
-    lineHeight: 15,
-    fontFamily: Fonts.mono,
-    textTransform: 'uppercase',
+    fontSize: 16,
+    lineHeight: 22,
   },
   themeSubtext: {
     fontSize: 12,
     lineHeight: 16,
+    opacity: 0.8,
   },
-  swatchRow: {
+  swatchPair: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 8,
+    alignItems: 'center',
   },
-  swatch: {
+  swatchHalf: {
     flex: 1,
-    height: 10,
+    flexDirection: 'row',
+    gap: 5,
+    alignItems: 'center',
+  },
+  swatchDivider: {
+    width: 1,
+    height: 20,
+    borderRadius: 1,
+    opacity: 0.4,
+  },
+  swatchDot: {
+    width: 18,
+    height: 18,
     borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(128,128,128,0.15)',
+  },
+  swatchDotLarge: {
+    width: 26,
+    height: 26,
   },
   loadingText: {
-    fontSize: 12,
+    fontSize: 11,
     lineHeight: 16,
     textAlign: 'center',
+    marginTop: 16,
+    letterSpacing: 0.5,
   },
 });

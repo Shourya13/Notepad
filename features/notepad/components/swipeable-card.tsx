@@ -1,16 +1,16 @@
-import { useRef } from 'react';
-import { Animated, View, Text, Pressable, StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { useCallback, useRef } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
+import { Fonts } from '@/constants/theme';
+import { BorderRadius, FontSizes, Shadows, Spacing } from '@/lib/design-tokens';
 import { UiPalette } from '@/lib/themes';
-import { Spacing, BorderRadius, Shadows, FontSizes } from '@/lib/design-tokens';
-
-type SwipeActionType = 'delete' | 'done' | 'edit';
 
 interface SwipeableCardProps {
   id: string;
-  icon: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
   iconColor: string;
   title: string;
   subtitle: string;
@@ -18,10 +18,13 @@ interface SwipeableCardProps {
   palette: UiPalette;
   isDone?: boolean;
   onPress: () => void;
-  onLeftSwipe: () => void; // Delete action
-  onRightSwipe?: () => void; // Mark done action (optional for shopping)
-  showDoneAction?: boolean; // Whether to show right swipe action
+  onLeftSwipe: () => void;   // swipe left → delete
+  onRightSwipe?: () => void; // swipe right → mark done
+  showDoneAction?: boolean;
 }
+
+const SWIPE_THRESHOLD = 76;
+const DISMISS_DISTANCE = 450;
 
 export function SwipeableCard({
   id,
@@ -38,117 +41,149 @@ export function SwipeableCard({
   showDoneAction = false,
 }: SwipeableCardProps) {
   const translateX = useRef(new Animated.Value(0)).current;
-  const actionPreview = useRef(new Animated.Value(0)).current;
-  const swipeThreshold = 60;
+  const thresholdFired = useRef(false);
+  const isSwiping = useRef(false);
+  const swipeDistance = useRef(0);
 
-  const onGestureEvent = Animated.event([{ nativeEvent: { translationX: translateX } }], {
-    useNativeDriver: false,
+  // Scale action icons as the user drags
+  const deleteScale = translateX.interpolate({
+    inputRange: [-SWIPE_THRESHOLD * 1.4, -SWIPE_THRESHOLD, -24, 0],
+    outputRange: [1.25, 1.0, 0.65, 0.5],
+    extrapolate: 'clamp',
   });
 
-  const onHandlerStateChange = (event: any) => {
-    if (event.nativeEvent.state === State.END) {
-      const { translationX } = event.nativeEvent;
+  const doneScale = translateX.interpolate({
+    inputRange: [0, 24, SWIPE_THRESHOLD, SWIPE_THRESHOLD * 1.4],
+    outputRange: [0.5, 0.65, 1.0, 1.25],
+    extrapolate: 'clamp',
+  });
 
-      if (translationX < -swipeThreshold) {
-        // Left swipe - DELETE
-        Animated.timing(translateX, {
-          toValue: -120,
-          duration: 200,
-          useNativeDriver: false,
-        }).start();
-        setTimeout(() => onLeftSwipe(), 100);
-      } else if (translationX > swipeThreshold && showDoneAction && onRightSwipe) {
-        // Right swipe - MARK DONE
-        Animated.timing(translateX, {
-          toValue: 120,
-          duration: 200,
-          useNativeDriver: false,
-        }).start();
-        setTimeout(() => onRightSwipe(), 100);
-      } else {
-        // Reset
-        Animated.timing(translateX, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: false,
-        }).start();
-      }
+  const onGestureEvent = Animated.event(
+    [{ nativeEvent: { translationX: translateX } }],
+    {
+      useNativeDriver: false,
+      listener: (event: any) => {
+        const tx = event.nativeEvent.translationX as number;
+        swipeDistance.current = tx;
+        if (Math.abs(tx) > 4) {
+          isSwiping.current = true;
+        }
+        const crossed = tx < -SWIPE_THRESHOLD || (showDoneAction && tx > SWIPE_THRESHOLD);
+        if (crossed && !thresholdFired.current) {
+          thresholdFired.current = true;
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+        } else if (!crossed) {
+          thresholdFired.current = false;
+        }
+      },
     }
-  };
+  );
 
-  // Update action preview based on swipe distance
-  const showDeletePreview = translateX.__getValue?.() < -20;
-  const showDonePreview = showDoneAction && translateX.__getValue?.() > 20;
+  const animateOut = useCallback(
+    (direction: 'left' | 'right', onComplete: () => void) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      Animated.timing(translateX, {
+        toValue: direction === 'left' ? -DISMISS_DISTANCE : DISMISS_DISTANCE,
+        duration: 230,
+        useNativeDriver: false,
+      }).start(() => {
+        onComplete();
+        translateX.setValue(0);
+      });
+    },
+    [translateX]
+  );
+
+  const snapBack = useCallback(() => {
+    Animated.spring(translateX, {
+      toValue: 0,
+      tension: 110,
+      friction: 12,
+      useNativeDriver: false,
+    }).start();
+  }, [translateX]);
+
+  const onHandlerStateChange = useCallback(
+    (event: any) => {
+      const { state, translationX: tx } = event.nativeEvent;
+      if (state === State.BEGAN) {
+        isSwiping.current = false;
+        swipeDistance.current = 0;
+      }
+      if (state === State.END || state === State.CANCELLED || state === State.FAILED) {
+        thresholdFired.current = false;
+        const wasSwiping = isSwiping.current;
+        isSwiping.current = false;
+        swipeDistance.current = 0;
+        if (tx < -SWIPE_THRESHOLD) {
+          animateOut('left', onLeftSwipe);
+        } else if (tx > SWIPE_THRESHOLD && showDoneAction && onRightSwipe) {
+          animateOut('right', onRightSwipe);
+        } else {
+          snapBack();
+        }
+      }
+    },
+    [animateOut, snapBack, onLeftSwipe, onRightSwipe, showDoneAction]
+  );
+
+  const handlePress = useCallback(() => {
+    if (isSwiping.current || Math.abs(swipeDistance.current) > 4) {
+      return;
+    }
+    onPress();
+  }, [onPress]);
 
   return (
     <View style={styles.container}>
-      {/* Background Actions */}
+      {/* Left background — Done (revealed on right swipe) */}
       {showDoneAction && (
-        <View
-          style={[
-            styles.actionLeft,
-            {
-              backgroundColor: palette.success,
-            },
-          ]}
-        >
-          <MaterialIcons name="done-all" size={24} color="#fff" />
-          <Text style={styles.actionText}>Done</Text>
+        <View style={[styles.actionBg, styles.actionBgLeft, { backgroundColor: palette.success }]}>
+          <Animated.View style={{ transform: [{ scale: doneScale }] }}>
+            <MaterialIcons name="check-circle-outline" size={22} color="#fff" />
+          </Animated.View>
+          <Text style={styles.actionLabel}>Done</Text>
         </View>
       )}
 
-      <View
-        style={[
-          styles.actionRight,
-          {
-            backgroundColor: palette.danger,
-          },
-        ]}
-      >
-        <MaterialIcons name="delete-outline" size={24} color="#fff" />
-        <Text style={styles.actionText}>Delete</Text>
+      {/* Right background — Delete (revealed on left swipe) */}
+      <View style={[styles.actionBg, styles.actionBgRight, { backgroundColor: palette.danger }]}>
+        <Animated.View style={{ transform: [{ scale: deleteScale }] }}>
+          <MaterialIcons name="delete-sweep" size={22} color="#fff" />
+        </Animated.View>
+        <Text style={styles.actionLabel}>Delete</Text>
       </View>
 
-      {/* Swipeable Card */}
+      {/* Card */}
       <PanGestureHandler
         onGestureEvent={onGestureEvent}
         onHandlerStateChange={onHandlerStateChange}
-        activeOffsetX={[-5, 5]}
+        activeOffsetX={[-8, 8]}
+        failOffsetY={[-18, 18]}
       >
         <Animated.View
           style={[
             styles.card,
-            {
-              backgroundColor: palette.surface,
-              transform: [{ translateX }],
-            },
+            { backgroundColor: palette.panel, transform: [{ translateX }] },
           ]}
         >
-          <Pressable
-            onPress={onPress}
-            style={styles.pressable}
-          >
-            <View style={styles.cardContent}>
-              {/* Icon */}
-              <View
-                style={[
-                  styles.iconWrapper,
-                  {
-                    backgroundColor: palette.accentLight,
-                  },
-                ]}
-              >
+          <Pressable onPress={handlePress} style={styles.pressable} android_ripple={{ color: palette.border }}>
+            <View style={styles.content}>
+              {/* Leading icon bubble */}
+              <View style={[styles.iconBubble, { backgroundColor: palette.accentSoft }]}>
                 <MaterialIcons name={icon} size={20} color={iconColor} />
               </View>
 
-              {/* Text Content */}
-              <View style={styles.textContent}>
+              {/* Text hierarchy */}
+              <View style={styles.textBlock}>
                 <Text
                   style={[
                     styles.title,
                     {
                       color: palette.text,
+                      fontFamily: Fonts.rounded,
                       textDecorationLine: isDone ? 'line-through' : 'none',
+                      opacity: isDone ? 0.5 : 1,
                     },
                   ]}
                   numberOfLines={1}
@@ -156,30 +191,22 @@ export function SwipeableCard({
                   {title}
                 </Text>
                 <Text
-                  style={[styles.subtitle, { color: palette.textTertiary }]}
+                  style={[styles.subtitle, { color: palette.muted, fontFamily: Fonts.sans }]}
                   numberOfLines={1}
                 >
                   {subtitle}
                 </Text>
                 <Text
-                  style={[styles.timestamp, { color: palette.textTertiary }]}
+                  style={[styles.timestamp, { color: palette.muted, fontFamily: Fonts.mono }]}
                   numberOfLines={1}
                 >
                   {timestamp}
                 </Text>
               </View>
 
-              {/* Swipe Action Preview (Right Side) */}
-              {showDeletePreview && (
-                <View style={styles.previewIcon}>
-                  <MaterialIcons name="delete-outline" size={20} color={palette.danger} />
-                </View>
-              )}
-
-              {showDonePreview && (
-                <View style={styles.previewIcon}>
-                  <MaterialIcons name="done-all" size={20} color={palette.success} />
-                </View>
+              {/* Done checkmark badge */}
+              {isDone && (
+                <MaterialIcons name="check-circle" size={16} color={palette.success} style={styles.doneBadge} />
               )}
             </View>
           </Pressable>
@@ -191,83 +218,78 @@ export function SwipeableCard({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: Spacing.md,
+    borderRadius: BorderRadius.lg,
     overflow: 'hidden',
-    borderRadius: BorderRadius.lg,
   },
-  actionLeft: {
+  actionBg: {
     position: 'absolute',
     top: 0,
+    bottom: 0,
     left: 0,
-    bottom: 0,
-    width: 100,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.xs,
-    borderRadius: BorderRadius.lg,
-    zIndex: 0,
-  },
-  actionRight: {
-    position: 'absolute',
-    top: 0,
     right: 0,
-    bottom: 0,
-    width: 100,
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'center',
+    paddingHorizontal: 28,
     gap: Spacing.xs,
-    borderRadius: BorderRadius.lg,
-    zIndex: 0,
   },
-  actionText: {
+  actionBgLeft: {
+    alignItems: 'flex-start',
+    borderTopLeftRadius: BorderRadius.lg,
+    borderBottomLeftRadius: BorderRadius.lg,
+  },
+  actionBgRight: {
+    alignItems: 'flex-end',
+    borderTopRightRadius: BorderRadius.lg,
+    borderBottomRightRadius: BorderRadius.lg,
+  },
+  actionLabel: {
     color: '#fff',
     fontSize: FontSizes.xs,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
   card: {
     borderRadius: BorderRadius.lg,
     ...Shadows.subtle,
-    zIndex: 1,
   },
   pressable: {
     flex: 1,
   },
-  cardContent: {
+  content: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.md + 2,
     paddingVertical: Spacing.md,
     gap: Spacing.md,
   },
-  iconWrapper: {
-    width: 44,
-    height: 44,
+  iconBubble: {
+    width: 42,
+    height: 42,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
-  textContent: {
+  textBlock: {
     flex: 1,
-    gap: Spacing.xs,
+    gap: 2,
   },
   title: {
     fontSize: FontSizes.base,
     fontWeight: '600',
-    lineHeight: 20,
+    lineHeight: 22,
   },
   subtitle: {
     fontSize: FontSizes.sm,
-    fontWeight: '400',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   timestamp: {
-    fontSize: FontSizes.xs,
-    fontWeight: '400',
-    lineHeight: 14,
+    fontSize: 11,
+    lineHeight: 16,
+    letterSpacing: 0.2,
   },
-  previewIcon: {
-    marginLeft: Spacing.sm,
+  doneBadge: {
+    flexShrink: 0,
   },
 });

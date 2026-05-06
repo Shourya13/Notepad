@@ -27,27 +27,68 @@ export const Colors = {
   },
 };
 
-export const Fonts = Platform.select({
+// Font families — loaded via expo-google-fonts in _layout.tsx
+export const FontFamily = {
+  sans: 'Inter_400Regular',
+  sansMedium: 'Inter_500Medium',
+  sansSemibold: 'Inter_600SemiBold',
+  sansBold: 'Inter_700Bold',
+  mono: 'JetBrainsMono_400Regular',
+  monoBold: 'JetBrainsMono_700Bold',
+} as const;
+
+// Fallback fonts when custom fonts haven't loaded yet
+export const FontFamilyFallback = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
+    sansMedium: 'system-ui',
+    sansSemibold: 'system-ui',
+    sansBold: 'system-ui',
     mono: 'ui-monospace',
+    monoBold: 'ui-monospace',
+  },
+  android: {
+    sans: 'Roboto',
+    sansMedium: 'Roboto',
+    sansSemibold: 'Roboto',
+    sansBold: 'Roboto',
+    mono: 'monospace',
+    monoBold: 'monospace',
   },
   default: {
     sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
+    sansMedium: 'normal',
+    sansSemibold: 'normal',
+    sansBold: 'normal',
     mono: 'monospace',
+    monoBold: 'monospace',
+  },
+}) as unknown as typeof FontFamily;
+
+// Legacy Fonts alias — kept for backward compatibility
+export const Fonts = Platform.select({
+  ios: {
+    sans: 'Inter_400Regular',
+    serif: 'Georgia',
+    rounded: 'Inter_600SemiBold',
+    mono: 'JetBrainsMono_400Regular',
+  },
+  android: {
+    sans: 'Inter_400Regular',
+    serif: 'serif',
+    rounded: 'Inter_600SemiBold',
+    mono: 'JetBrainsMono_400Regular',
   },
   web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    sans: 'Inter_400Regular',
     serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+    rounded: 'Inter_600SemiBold',
+    mono: 'JetBrainsMono_400Regular',
   },
-});
+  default: {
+    sans: 'Inter_400Regular',
+    serif: 'serif',
+    rounded: 'Inter_600SemiBold',
+    mono: 'JetBrainsMono_400Regular',
+  },
+}) as { sans: string; serif: string; rounded: string; mono: string };

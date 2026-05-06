@@ -1,6 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-import { ThemeMode, minimalThemes } from "@/lib/themes";
+import { ThemeId, ThemeMode } from "@/lib/themes";
 
 export type SectionKey = "notes" | "todos" | "shopping" | "links";
 
@@ -36,7 +36,7 @@ export type LinkItem = {
 };
 
 export type ThemePreferences = {
-  themeId: keyof typeof minimalThemes;
+  themeId: ThemeId;
   mode: ThemeMode;
 };
 

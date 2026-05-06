@@ -84,10 +84,10 @@ export function EntityList({
           <View
             style={[
               styles.emptyState,
-              { backgroundColor: palette.surface },
+              { backgroundColor: palette.panel },
             ]}
           >
-            <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
+            <Text style={[styles.emptyText, { color: palette.muted }]}>
               Loading saved data...
             </Text>
           </View>
@@ -100,10 +100,10 @@ export function EntityList({
               <View
                 style={[
                   styles.emptyState,
-                  { backgroundColor: palette.surface },
+                  { backgroundColor: palette.panel },
                 ]}
               >
-                <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
+                <Text style={[styles.emptyText, { color: palette.muted }]}>
                   {deferredNoteSearch
                     ? "No notes match this search."
                     : "No notes yet. Tap + to add your first note."}
@@ -136,10 +136,10 @@ export function EntityList({
               <View
                 style={[
                   styles.emptyState,
-                  { backgroundColor: palette.surface },
+                  { backgroundColor: palette.panel },
                 ]}
               >
-                <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
+                <Text style={[styles.emptyText, { color: palette.muted }]}>
                   {deferredTodoSearch
                     ? "No tasks match this search."
                     : "No tasks yet. Tap + to add your first task."}
@@ -174,10 +174,10 @@ export function EntityList({
               <View
                 style={[
                   styles.emptyState,
-                  { backgroundColor: palette.surface },
+                  { backgroundColor: palette.panel },
                 ]}
               >
-                <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
+                <Text style={[styles.emptyText, { color: palette.muted }]}>
                   {deferredShoppingSearch
                     ? "No shopping items match this search."
                     : "No shopping items yet. Tap + to add your first item."}
@@ -210,10 +210,10 @@ export function EntityList({
               <View
                 style={[
                   styles.emptyState,
-                  { backgroundColor: palette.surface },
+                  { backgroundColor: palette.panel },
                 ]}
               >
-                <Text style={[styles.emptyText, { color: palette.textTertiary }]}>
+                <Text style={[styles.emptyText, { color: palette.muted }]}>
                   {deferredLinkSearch
                     ? "No links match this search."
                     : "No links yet. Tap + to add your first link."}

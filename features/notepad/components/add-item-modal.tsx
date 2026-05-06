@@ -75,6 +75,7 @@ export function AddItemModal({
       <View style={[styles.overlay, { backgroundColor: palette.overlay }]}>
         <Pressable onPress={onClose} style={styles.overlayTap} />
         <View style={[styles.sheet, { backgroundColor: palette.background, borderColor: palette.border }]}>
+          <View style={styles.handle} />
           <View style={styles.sheetHeader}>
             <Text style={[styles.sheetTitle, { color: palette.text }]}>{modalTitle}</Text>
             <Pressable onPress={onClose} style={[styles.closeButton, { borderColor: palette.border }]}>

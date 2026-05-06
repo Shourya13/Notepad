@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 import { Fonts } from '@/constants/theme';
-import { BorderRadius, Spacing, Shadows, FontSizes, ComponentSizes } from '@/lib/design-tokens';
+import { BorderRadius, ComponentSizes, FontSizes, Shadows, Spacing } from '@/lib/design-tokens';
 
 export const addItemModalStyles = StyleSheet.create({
   overlay: {
@@ -14,57 +14,71 @@ export const addItemModalStyles = StyleSheet.create({
   sheet: {
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.xxl,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.xxxl,
     gap: Spacing.md,
     ...Shadows.elevated,
+    // Handle bar indicator
+    borderTopWidth: 0,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: Spacing.sm,
+    opacity: 0.25,
+    backgroundColor: '#888',
   },
   sheetHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xs,
   },
   sheetTitle: {
     fontSize: FontSizes.xl,
-    lineHeight: 26,
+    lineHeight: 28,
     fontFamily: Fonts.rounded,
     fontWeight: '600',
+    letterSpacing: -0.3,
   },
   closeButton: {
-    width: ComponentSizes.buttonMd,
-    height: ComponentSizes.buttonMd,
-    borderRadius: BorderRadius.md,
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Shadows.subtle,
+    borderWidth: 1,
   },
   input: {
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: FontSizes.base,
-    lineHeight: 20,
-    ...Shadows.subtle,
+    lineHeight: 22,
+    fontFamily: Fonts.sans,
+    borderWidth: 1,
   },
   textArea: {
-    minHeight: 120,
+    minHeight: 110,
     maxHeight: 180,
   },
   submitButton: {
     marginTop: Spacing.xs,
-    borderRadius: BorderRadius.md,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    paddingVertical: Spacing.md + 2,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.subtle,
   },
   submitText: {
     fontSize: FontSizes.base,
-    lineHeight: 20,
-    fontFamily: Fonts.sans,
+    lineHeight: 22,
+    fontFamily: Fonts.rounded,
     fontWeight: '600',
+    color: '#fff',
+    letterSpacing: 0.2,
   },
 });
