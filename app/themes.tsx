@@ -4,26 +4,26 @@ import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Fonts } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import {
-  DEFAULT_THEME_PREFERENCES,
-  THEME_IDS,
-  THEME_MODES,
-  ThemeMode,
-  ThemePreferences,
-  minimalThemes,
-  normalizeThemePreferences,
-  resolveThemeMode,
+    DEFAULT_THEME_PREFERENCES,
+    THEME_IDS,
+    THEME_MODES,
+    ThemeMode,
+    ThemePreferences,
+    minimalThemes,
+    normalizeThemePreferences,
+    resolveThemeMode,
 } from '@/lib/themes';
 
 type PersistedStore = {

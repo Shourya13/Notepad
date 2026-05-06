@@ -107,30 +107,35 @@ export default function NotepadApp() {
 
   const submitFromModal = () => {
     if (activeSection === "notes") {
+      const isEditing = !!entities.editingNoteId;
       const saved = entities.handleNoteSubmit();
-      if (saved) {
+      // Close only when saving an existing note, not when adding new ones
+      if (saved && isEditing) {
         setItemModalOpen(false);
       }
       return;
     }
     if (activeSection === "todos") {
+      const isEditing = !!entities.editingTodoId;
       const saved = entities.handleTodoSubmit();
-      if (saved) {
+      if (saved && isEditing) {
         setItemModalOpen(false);
       }
       return;
     }
 
     if (activeSection === "shopping") {
+      const isEditing = !!entities.editingShoppingId;
       const saved = entities.handleShoppingSubmit();
-      if (saved) {
+      if (saved && isEditing) {
         setItemModalOpen(false);
       }
       return;
     }
 
+    const isEditing = !!entities.linkEditingId;
     const saved = entities.handleLinkSubmit();
-    if (saved) {
+    if (saved && isEditing) {
       setItemModalOpen(false);
     }
   };
@@ -154,7 +159,7 @@ export default function NotepadApp() {
             onPress={() => setMenuOpen(true)}
             style={[
               styles.iconButton,
-              { backgroundColor: palette.panel, borderColor: palette.border },
+              { backgroundColor: palette.panel },
             ]}
           >
             <MaterialIcons color={palette.text} name="menu" size={22} />
@@ -194,7 +199,7 @@ export default function NotepadApp() {
         <View
           style={[
             styles.searchWrap,
-            { borderColor: palette.border, backgroundColor: palette.panel },
+            { backgroundColor: palette.panel },
           ]}
         >
           <MaterialIcons color={palette.muted} name="search" size={18} />
@@ -330,7 +335,11 @@ export default function NotepadApp() {
               styles.drawer,
               {
                 backgroundColor: palette.panel,
-                borderColor: palette.border,
+                shadowColor: '#000',
+                shadowOffset: { width: 4, height: 0 },
+                shadowOpacity: 0.14,
+                shadowRadius: 16,
+                elevation: 10,
                 transform: [{ translateX: menuTranslateX }],
               },
             ]}
@@ -353,7 +362,6 @@ export default function NotepadApp() {
                   style={[
                     styles.drawerItem,
                     {
-                      borderColor: active ? palette.accent : palette.border,
                       backgroundColor: active
                         ? palette.accentSoft
                         : palette.panelSoft,
@@ -390,10 +398,7 @@ export default function NotepadApp() {
                 }}
                 style={[
                   styles.drawerItem,
-                  {
-                    borderColor: palette.border,
-                    backgroundColor: palette.panelSoft,
-                  },
+                  { backgroundColor: palette.panelSoft },
                 ]}
               >
                 <MaterialIcons color={palette.muted} name="palette" size={20} />

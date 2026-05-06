@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 import { Fonts } from '@/constants/theme';
-import { BorderRadius, FontSizes, Shadows, Spacing } from '@/lib/design-tokens';
+import { BorderRadius, FontSizes, Spacing } from '@/lib/design-tokens';
 
 export const entityListStyles = StyleSheet.create({
   listArea: {

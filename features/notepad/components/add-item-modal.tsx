@@ -1,5 +1,6 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Modal, Pressable, Text, TextInput, View } from 'react-native';
 
 import { SectionKey } from '../types';
 
@@ -70,15 +71,44 @@ export function AddItemModal({
           ? 'Edit Link'
           : 'Add Link';
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(60)).current;
+
+  useEffect(() => {
+    if (visible) {
+      fadeAnim.setValue(0);
+      slideAnim.setValue(60);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 80,
+          friction: 12,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible, fadeAnim, slideAnim]);
+
   return (
-    <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
-      <View style={[styles.overlay, { backgroundColor: palette.overlay }]}>
+    <Modal animationType="none" onRequestClose={onClose} transparent visible={visible}>
+      <Animated.View style={[styles.overlay, { backgroundColor: palette.overlay, opacity: fadeAnim }]}>
         <Pressable onPress={onClose} style={styles.overlayTap} />
-        <View style={[styles.sheet, { backgroundColor: palette.background, borderColor: palette.border }]}>
+        <Animated.View
+          style={[
+            styles.sheet,
+            { backgroundColor: palette.panel },
+            { transform: [{ translateY: slideAnim }] },
+          ]}
+        >
           <View style={styles.handle} />
           <View style={styles.sheetHeader}>
             <Text style={[styles.sheetTitle, { color: palette.text }]}>{modalTitle}</Text>
-            <Pressable onPress={onClose} style={[styles.closeButton, { borderColor: palette.border }]}>
+            <Pressable onPress={onClose} style={[styles.closeButton, { backgroundColor: palette.panelSoft }]}>
               <MaterialIcons color={palette.text} name="close" size={18} />
             </Pressable>
           </View>
@@ -89,7 +119,7 @@ export function AddItemModal({
                 onChangeText={setNoteTitle}
                 placeholder="Note title"
                 placeholderTextColor={palette.muted}
-                style={[styles.input, { color: palette.text, borderColor: palette.border, backgroundColor: palette.panel }]}
+                style={[styles.input, { color: palette.text, backgroundColor: palette.panelSoft }]}
                 value={noteTitle}
               />
               <TextInput
@@ -100,7 +130,7 @@ export function AddItemModal({
                 style={[
                   styles.input,
                   styles.textArea,
-                  { color: palette.text, borderColor: palette.border, backgroundColor: palette.panel },
+                  { color: palette.text, backgroundColor: palette.panelSoft },
                 ]}
                 textAlignVertical="top"
                 value={noteBody}
@@ -121,7 +151,7 @@ export function AddItemModal({
                 onChangeText={setTodoTitle}
                 placeholder="Task"
                 placeholderTextColor={palette.muted}
-                style={[styles.input, { color: palette.text, borderColor: palette.border, backgroundColor: palette.panel }]}
+                style={[styles.input, { color: palette.text, backgroundColor: palette.panelSoft }]}
                 value={todoTitle}
               />
               <Pressable
@@ -140,7 +170,7 @@ export function AddItemModal({
                 onChangeText={setShoppingLabel}
                 placeholder="Shopping item"
                 placeholderTextColor={palette.muted}
-                style={[styles.input, { color: palette.text, borderColor: palette.border, backgroundColor: palette.panel }]}
+                style={[styles.input, { color: palette.text, backgroundColor: palette.panelSoft }]}
                 value={shoppingLabel}
               />
               <Pressable
@@ -162,7 +192,7 @@ export function AddItemModal({
                 onChangeText={setLinkUrlInput}
                 placeholder="https://example.com"
                 placeholderTextColor={palette.muted}
-                style={[styles.input, { color: palette.text, borderColor: palette.border, backgroundColor: palette.panel }]}
+                style={[styles.input, { color: palette.text, backgroundColor: palette.panelSoft }]}
                 value={linkUrlInput}
               />
               <TextInput
@@ -173,7 +203,7 @@ export function AddItemModal({
                 style={[
                   styles.input,
                   styles.textArea,
-                  { color: palette.text, borderColor: palette.border, backgroundColor: palette.panel },
+                  { color: palette.text, backgroundColor: palette.panelSoft },
                 ]}
                 textAlignVertical="top"
                 value={linkDescriptionInput}
@@ -187,8 +217,8 @@ export function AddItemModal({
               </Pressable>
             </>
           ) : null}
-        </View>
-      </View>
+        </Animated.View>
+      </Animated.View>
     </Modal>
   );
 }

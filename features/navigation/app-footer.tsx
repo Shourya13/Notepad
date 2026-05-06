@@ -22,7 +22,7 @@ const meta: Record<FooterKey, { label: string; icon: keyof typeof MaterialIcons.
 
 export function AppFooter({ activeKey, palette, onPress }: Props) {
   return (
-    <View style={[styles.footer, { borderTopColor: palette.border, backgroundColor: palette.background }]}>
+    <View style={[styles.footer, { backgroundColor: palette.background }]}>
       {(Object.keys(meta) as FooterKey[]).map((key) => {
         const active = key === activeKey;
         return (

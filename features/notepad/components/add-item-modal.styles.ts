@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 import { Fonts } from '@/constants/theme';
-import { BorderRadius, ComponentSizes, FontSizes, Shadows, Spacing } from '@/lib/design-tokens';
+import { BorderRadius, FontSizes, Shadows, Spacing } from '@/lib/design-tokens';
 
 export const addItemModalStyles = StyleSheet.create({
   overlay: {
@@ -50,7 +50,11 @@ export const addItemModalStyles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 1,
   },
   input: {
     borderRadius: BorderRadius.md,
@@ -59,7 +63,11 @@ export const addItemModalStyles = StyleSheet.create({
     fontSize: FontSizes.base,
     lineHeight: 22,
     fontFamily: Fonts.sans,
-    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 3,
+    elevation: 1,
   },
   textArea: {
     minHeight: 110,

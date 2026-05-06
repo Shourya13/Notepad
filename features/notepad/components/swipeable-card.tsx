@@ -1,8 +1,8 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { Fonts } from '@/constants/theme';
 import { BorderRadius, FontSizes, Shadows, Spacing } from '@/lib/design-tokens';
@@ -225,19 +225,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: 'flex-end',
+    width: '50%',
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 28,
+    paddingHorizontal: 20,
     gap: Spacing.xs,
   },
   actionBgLeft: {
+    left: 0,
     alignItems: 'flex-start',
     borderTopLeftRadius: BorderRadius.lg,
     borderBottomLeftRadius: BorderRadius.lg,
   },
   actionBgRight: {
+    right: 0,
     alignItems: 'flex-end',
     borderTopRightRadius: BorderRadius.lg,
     borderBottomRightRadius: BorderRadius.lg,

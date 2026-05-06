@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 import { Fonts } from '@/constants/theme';
-import { BorderRadius, FontSizes, Shadows, Spacing } from '@/lib/design-tokens';
+import { BorderRadius, Shadows, Spacing } from '@/lib/design-tokens';
 
 export const appFooterStyles = StyleSheet.create({
   footer: {
@@ -11,7 +11,6 @@ export const appFooterStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    borderTopWidth: 1,
     ...Shadows.elevated,
   },
   item: {
